@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launch background color - matches the light beige from your splash image -->
+    <color name="launch_background_color">#f7f5f0</color>
+</resources>
