@@ -40,6 +40,10 @@ class RunTrackerController extends GetxController {
   final Rx<Duration> runDuration = const Duration().obs;
   final RxList<LatLngPoint> currentPath = <LatLngPoint>[].obs;
   
+  // Simulation mode for Judge and Demo testing
+  final RxBool isSimulating = false.obs;
+  final RxDouble simulationProgress = 0.0.obs;
+  
   // Path customization
   final Rx<Color> selectedPathColor = const Color(0xFF2196F3).obs;
   static const List<Color> pathColors = [
@@ -365,7 +369,82 @@ class RunTrackerController extends GetxController {
     }
   }
 
-  void stopRun() async {
+  /// Start a simulated run for Judge / Demo testing without GPS hardware blocking
+  Future<bool> startSimulatedRun({required geo.Position initialPosition}) async {
+    print('🧪 Starting SIMULATED run at ${initialPosition.latitude}, ${initialPosition.longitude}');
+    isStartingRun.value = false;
+    isSimulating.value = true;
+    simulationProgress.value = 0.0;
+    _gpsRestartCount = 0;
+    
+    // Reset previous run data
+    _resetTrackingData();
+    
+    _runStartTime = DateTime.now();
+    currentRunSession.value = RunSession(
+      id: _uuid.v4(),
+      userId: _territoryService.currentUserId ?? 'demo_judge',
+      startTime: _runStartTime!,
+      rawPath: [],
+      status: RunStatus.active,
+    );
+    
+    // Add start point
+    LatLngPoint startPoint = _locationService.positionToLatLngPoint(initialPosition);
+    _addTrackingPoint(startPoint);
+    _lastPosition = initialPosition;
+    
+    runState.value = RunState.running;
+    isRunning.value = true;
+    isPaused.value = false;
+    
+    _startDurationTimer();
+    
+    // Center map on starting position
+    await _centerMapOnUser(initialPosition);
+    
+    return true;
+  }
+
+  /// Inject simulated GPS position from SimulationService
+  void injectSimulatedPosition(geo.Position position, {double progress = 0.0}) {
+    if (!isRunning.value) return;
+    simulationProgress.value = progress;
+    
+    // Process position through the standard run tracking pipeline
+    _onLocationUpdate(position);
+    
+    // Smoothly pan camera to follow simulated position
+    if (_runMap != null) {
+      _runMap!.setCamera(
+        CameraOptions(
+          center: Point(coordinates: Position(
+            position.longitude,
+            position.latitude,
+          )),
+          zoom: 17.0,
+        ),
+      );
+    }
+  }
+
+  /// Complete simulated run and trigger territory creation
+  Future<void> endSimulatedRun() async {
+    print('🧪 Completing simulated run...');
+    simulationProgress.value = 1.0;
+    await stopRun();
+    isSimulating.value = false;
+  }
+
+  /// Cancel simulated run
+  void cancelSimulatedRun() {
+    print('🧪 Cancelling simulated run...');
+    isSimulating.value = false;
+    simulationProgress.value = 0.0;
+    cancelRun();
+  }
+
+  Future<void> stopRun() async {
     print('🛑 stopRun() called');
     print('🛑 Current run state: ${runState.value}');
     print('🛑 isRunning: ${isRunning.value}');
@@ -912,16 +991,20 @@ class RunTrackerController extends GetxController {
     print('🔐 Authentication status: $isAuthenticated, User ID: $currentUserId');
     
     if (!isAuthenticated) {
-      print('❌ User not authenticated - territory upload will fail');
-      Get.snackbar(
-        'Authentication Error',
-        'Please sign in to save territories',
-        duration: const Duration(seconds: 3),
-      );
-      _isProcessingTerritory = false;
-      Get.offAllNamed('/home'); // Navigate to main app view
-      _resetRun();
-      return;
+      if (isSimulating.value) {
+        print('🧪 In simulation mode: proceeding with local demo territory creation even without cloud authentication!');
+      } else {
+        print('❌ User not authenticated - territory upload will fail');
+        Get.snackbar(
+          'Authentication Error',
+          'Please sign in to save territories',
+          duration: const Duration(seconds: 3),
+        );
+        _isProcessingTerritory = false;
+        Get.offAllNamed('/home'); // Navigate to main app view
+        _resetRun();
+        return;
+      }
     }
     
     // Detect if we have a closed loop or need to auto-close
@@ -997,6 +1080,44 @@ class RunTrackerController extends GetxController {
       print('🗺️ - First point: ${territoryPoints.first.latitude}, ${territoryPoints.first.longitude}');
       print('🗺️ - Last point: ${territoryPoints.last.latitude}, ${territoryPoints.last.longitude}');
       print('🗺️ - Are equal: ${_arePointsEqual(territoryPoints.first, territoryPoints.last)}');
+
+      // If we are simulating for Judge evaluation, handle gracefully
+      if (isSimulating.value) {
+        print('🧪 In simulation mode: processing demo territory locally & gracefully updating map');
+        if (isAuthenticated) {
+          try {
+            await _databaseService.uploadTerritory(newTerritory);
+            print('✅ Simulation territory uploaded to Supabase successfully');
+          } catch (e) {
+            print('⚠️ Simulation territory cloud upload skipped/failed: $e');
+          }
+        }
+        
+        // Add territory to local service for immediate UI update
+        print('📤 Adding simulation territory to local service...');
+        await _territoryService.addUserTerritory(newTerritory);
+        print('✅ Simulation territory added to userTerritories list');
+        
+        // Create and display the territory area on current map
+        try {
+          await _createTerritoryArea(territoryPoints);
+        } catch (e) {
+          print('🎨 Attempting fallback visualization...');
+          await _createFallbackTerritoryVisualization(territoryPoints);
+        }
+        
+        isUploadingTerritory.value = false;
+        _isProcessingTerritory = false;
+        
+        Get.snackbar(
+          '🎯 Territory Conquered!',
+          'Simulated ${area.toStringAsFixed(0)} m² claimed! Loop validated on Mapbox.',
+          duration: const Duration(seconds: 4),
+          backgroundColor: const Color(0xFF8338EC),
+          colorText: Colors.white,
+        );
+        return;
+      }
 
       // Insert exactly one new territory for the FULL run polygon
       print('📤 Uploading new territory (single insert) to Supabase...');
@@ -1763,6 +1884,8 @@ class RunTrackerController extends GetxController {
     isPaused.value = false;
     isStartingRun.value = false; // Clear loading state
     isUploadingTerritory.value = false; // Clear territory upload state
+    isSimulating.value = false;
+    simulationProgress.value = 0.0;
     totalDistance.value = 0.0;
     runDuration.value = const Duration();
     currentPath.clear();

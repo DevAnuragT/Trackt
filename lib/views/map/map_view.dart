@@ -8,6 +8,7 @@ import '../../controllers/location/location_controller.dart';
 import '../../services/location_service.dart';
 import 'components/map_controls_widget.dart';
 import 'components/bottom_sheet_widget.dart';
+import 'components/simulation_sheet.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -72,9 +73,59 @@ class _MapViewState extends State<MapView> {
               top: 60,
               child: MapControlsWidget(),
             ),
+
+            // Top Judge Simulator Trigger Button
+            Positioned(
+              left: 16,
+              top: 16,
+              child: _buildJudgeSimulatorButton(context),
+            ),
             
             // Bottom sheet with territory info and run controls
             const TerritoryBottomSheet(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJudgeSimulatorButton(BuildContext context) {
+    return InkWell(
+      onTap: () => SimulationSheet.show(context),
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161224).withValues(alpha: 0.94),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFF8338EC).withValues(alpha: 0.85),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8338EC).withValues(alpha: 0.35),
+              blurRadius: 14,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 18),
+            SizedBox(width: 6),
+            Text(
+              'Judge Demo Lab',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 0.3,
+              ),
+            ),
+            SizedBox(width: 6),
+            Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 11),
           ],
         ),
       ),

@@ -13,7 +13,7 @@ import '../../services/location_permission_service.dart';
 // import '../../core/enums/run_state.dart';
 import 'components/run_controls_widget.dart';
 import 'components/run_stats_widget.dart';
-
+import '../../services/simulation_service.dart';
 
 class RunPageAutoStart extends StatefulWidget {
   final bool autoStart;
@@ -114,8 +114,14 @@ class _RunPageState extends State<RunPageAutoStart> {
             right: 16,
             child: const RunStatsWidget(),
           ),
-          
-          // Conquest test buttons removed
+
+          // Simulation HUD overlay (below stats when simulation is active)
+          Positioned(
+            top: 114,
+            left: 16,
+            right: 16,
+            child: _buildSimulationHud(),
+          ),
           
           // Run controls (bottom)
           Positioned(
@@ -128,12 +134,125 @@ class _RunPageState extends State<RunPageAutoStart> {
               },
             ),
           ),
-          
-
         ],
       ),
       ),
     );
+  }
+
+  Widget _buildSimulationHud() {
+    if (!Get.isRegistered<SimulationService>()) return const SizedBox.shrink();
+    final simService = Get.find<SimulationService>();
+
+    return Obx(() {
+      if (!simService.isSimulating.value) return const SizedBox.shrink();
+
+      final preset = simService.currentPresetInfo;
+      final progressPercent = (simService.progress.value * 100).toInt();
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161228).withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF8338EC),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8338EC).withValues(alpha: 0.4),
+              blurRadius: 16,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      'SIMULATING: ${preset.title}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                InkWell(
+                  onTap: () => simService.stopSimulation(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.redAccent, width: 0.8),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.stop, color: Colors.redAccent, size: 12),
+                        SizedBox(width: 4),
+                        Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: simService.progress.value,
+                backgroundColor: Colors.white12,
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00F5D4)),
+                minHeight: 5,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  simService.currentPhase.value,
+                  style: const TextStyle(
+                    color: Color(0xFF00F5D4),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  '$progressPercent%',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildLiveTrackingMap() {

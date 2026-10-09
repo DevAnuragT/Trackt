@@ -16,6 +16,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 import 'services/samsung_permission_helper.dart';
+import 'services/simulation_service.dart';
 
 
 Future<void> main() async {
@@ -62,6 +63,7 @@ Future<void> main() async {
     // Initialize UserPreferencesService asynchronously
     await Get.putAsync(() => UserPreferencesService().init());
     Get.put(RunTrackerController());
+    Get.put(SimulationService(), permanent: true);
     
     // REMOVED: Location permissions are now requested after UI is ready
     // This prevents black screen issues during app startup
