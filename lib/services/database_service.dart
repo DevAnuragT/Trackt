@@ -3,7 +3,9 @@ import '../models/territory/territory_model.dart';
 import '../models/territory/steal_event_model.dart';
 
 class DatabaseService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Lazy so constructing the service doesn't throw when Supabase isn't
+  // initialized (e.g. unit tests, or when Supabase keys aren't configured).
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   // ==================== TERRITORIES ====================
 
@@ -958,10 +960,22 @@ class DatabaseService {
   // ==================== UTILITY METHODS ====================
 
   /// Check if user is authenticated
-  bool get isAuthenticated => _supabase.auth.currentUser != null;
+  bool get isAuthenticated {
+    try {
+      return _supabase.auth.currentUser != null;
+    } catch (_) {
+      return false; // Supabase not initialized (tests / unconfigured)
+    }
+  }
 
   /// Get current user ID
-  String? get currentUserId => _supabase.auth.currentUser?.id;
+  String? get currentUserId {
+    try {
+      return _supabase.auth.currentUser?.id;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// Test database connection with timeout and retry
   Future<bool> testConnection() async {

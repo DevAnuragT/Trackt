@@ -214,6 +214,19 @@ class UserPreferencesService extends GetxService {
     print('✅ Added $coinsToAdd coins. New total: $newTotal');
   }
 
+  /// Deduct [amount] coins if the balance is sufficient.
+  /// Returns true on success, false if there aren't enough coins.
+  Future<bool> spendUserCoins(int amount) async {
+    if (amount <= 0) return false;
+    if (userCoins.value < amount) {
+      print('⚠️ Insufficient coins: have ${userCoins.value}, need $amount');
+      return false;
+    }
+    await setUserCoins(userCoins.value - amount);
+    print('✅ Spent $amount coins. New total: ${userCoins.value}');
+    return true;
+  }
+
   /// Set first launch as completed with better debugging
   Future<void> setFirstLaunchCompleted() async {
     print('🔍 Setting first launch as completed...');

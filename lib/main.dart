@@ -19,6 +19,7 @@ import 'services/notification_service.dart';
 import 'services/samsung_permission_helper.dart';
 import 'services/simulation_service.dart';
 import 'services/monad_service.dart';
+import 'services/power_up_service.dart';
 
 
 Future<void> main() async {
@@ -65,6 +66,7 @@ Future<void> main() async {
     Get.put(SamsungPermissionHelper());
     // Initialize UserPreferencesService asynchronously
     await Get.putAsync(() => UserPreferencesService().init());
+    await Get.putAsync(() => PowerUpService().init());
     await Get.putAsync(() => MonadService().init());
     Get.put(RunTrackerController());
     Get.put(SimulationService(), permanent: true);

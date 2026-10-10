@@ -37,5 +37,15 @@ Sim victory now uses `MonadService` tx + explorer link.
 - [ ] MON balance populates once wallet funded on testnet (0.00000 until then — expected).
 - [ ] Pill doesn't overlap map zoom controls (right side) or Judge button awkwardly — eyeball spacing on a real screen.
 
+## P2 — Power-Up Shop
+`store_view.dart` rebuilt; `PowerUpService` economy. Shield (250), Speed (150), Flag (500, permanent).
+- [ ] Open Store tab → 3 power-up cards + $TRACKT balance chip in app bar (not "Coming Soon").
+- [ ] With enough coins: Buy → success snackbar, balance drops, card shows ACTIVE / time-left badge (Shield/Speed) or OWNED (Flag).
+- [ ] With too few coins: Buy → "Not enough $TRACKT" red snackbar, balance unchanged.
+- [ ] Flag: after buying, button disables to "Owned", can't rebuy.
+- [ ] Kill + relaunch app → purchased power-ups still active (persisted).
+- [ ] NOTE / known gap: purchases are tracked but gameplay **effects aren't enforced yet** (shield doesn't yet block theft, speed doesn't yet 2× rewards). Economy + UI only for now — flag if you want effects wired next.
+
+
 
 
