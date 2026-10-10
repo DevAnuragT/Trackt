@@ -198,3 +198,18 @@ test/
 ---
 
 *Document created on October 10, 2026 for the Trackt Core Team.*
+
+---
+
+## 9. Progress Addendum — October 11, 2026 (Mobile Web3 + Features Session)
+
+All mobile-side roadmap priorities P0–P3 are implemented, unit/widget-tested, and committed on `monad`. Test suite: **40/40 passing**, `flutter analyze` **0 errors**.
+
+- **P0 — Monad Web3 client** (`lib/services/monad_service.dart`): `web3dart` client to Monad Testnet (`143`), on-device burner wallet persisted in `SharedPreferences`, `claimTerritoryOnChain()` + `getTracktTokenBalance()`, wired into `RunTrackerController` run completion. Degrades to a local settlement proof until contracts are deployed. Config via `MONAD_*` env vars (see README).
+- **P1 — Seeded rivals** (`lib/services/seed_territory_service.dart`): ~48 colorful rival territories across NYC, SF, London, merged into the map on every refresh (works offline).
+- **P2 — Power-Up Shop** (`lib/services/power_up_service.dart`, `lib/views/store/store_view.dart`): Shield (250), Speed Multiplier (150), Custom Flag (500). Purchases persist; `$TRACKT` spent via `UserPreferencesService.spendUserCoins()`.
+- **P3 — Anti-cheat**: `RunTrackerController.isImplausibleRunningSpeed()` rejects > 25 km/h GPS updates (skipped during simulation).
+- **Economy loop**: completing a run/sim awards 100 `$TRACKT` (×2 while Speed Multiplier active). Wallet HUD pill on the map shows address + balance.
+- **Hygiene**: removed 4 zero-byte ghost stub files; made `DatabaseService` resilient when Supabase isn't initialized.
+
+**Known gaps / next:** Shield has no effect yet (conquest resolution is still stubbed, pending teammate contracts); deployed contract addresses TBD; Mapbox visual polish and submission video outstanding. Manual on-device checks are tracked in [TESTING_NOTES.md](TESTING_NOTES.md).
