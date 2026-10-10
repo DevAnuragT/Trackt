@@ -61,6 +61,15 @@ Completing a run/sim now awards 100 $TRACKT (×2 while Speed Multiplier active).
 - [ ] Earn enough from a few sims → afford Shield/Flag without hand-editing coins.
 - [ ] NOTE: this partially wires the earlier "effects not enforced" gap — Speed Multiplier now has a real effect; Shield still pending conquest logic.
 
+## Smart contracts (Foundry) — `contracts/`
+`RunRewardToken.sol` (ERC-20 $TRACKT) + `TerritoryRegistry.sol` (claim/conquest/reward). 32 Foundry tests, all passing.
+- [ ] `cd contracts && forge test -vvv` → 32 pass (needs Foundry: `brew install foundry`).
+- [ ] Deploy to Monad Testnet: `PRIVATE_KEY=0x… forge script script/Deploy.s.sol:Deploy --rpc-url https://testnet-rpc.monad.xyz --broadcast` (needs a funded testnet key).
+- [ ] After deploy: put addresses in `.env.<env>` (`MONAD_TERRITORY_CONTRACT`, `MONAD_TOKEN_CONTRACT`); then a real run broadcasts an on-chain `claimTerritory` and the victory dialog's "View on Monad Explorer" resolves to a live tx.
+- [ ] Verify contract ABI matches `monad_service.dart` (it does: `claimTerritory(uint256,int256,int256,uint256)`, ERC-20 `balanceOf`).
+- [ ] (If coordinating with teammate) reconcile this registry with their design before mainnet — interface already matches the client.
+
+
 
 
 

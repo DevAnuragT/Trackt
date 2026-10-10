@@ -69,7 +69,7 @@ Simulation bypasses auth and network so it works on a fresh install with no acco
 * **Spatial Engine:** PostgreSQL + PostGIS (`ST_MakePolygon`, `ST_UnaryUnion`, `ST_Intersection`, `ST_Difference`).
 * **Blockchain:** Monad Testnet (`Chain ID: 143`) for territory ownership verification, steal audit trails, and tokenized run rewards.
 * **Mobile Web3 client:** `web3dart` + an on-device burner wallet (`MonadService`). The private key is generated with `Random.secure()` and persisted in `SharedPreferences`; territory claims are signed locally and broadcast to the Monad RPC. Falls back to a local settlement proof until the contracts are deployed, so the demo never breaks.
-* **Smart contracts (teammate):** `TerritoryRegistry.sol` (`claimTerritory`) and `RunRewardToken.sol` (ERC-20 `$TRACKT`).
+* **Smart contracts:** [`TerritoryRegistry.sol`](contracts/src/TerritoryRegistry.sol) (`claimTerritory` + conquest) and [`RunRewardToken.sol`](contracts/src/RunRewardToken.sol) (ERC-20 `$TRACKT`), built and tested with Foundry (32 passing tests). See [`contracts/`](contracts/README.md).
 * **Native Android:** Sticky Foreground Service (`GpsTrackingService.kt`) with wake-locks and Samsung One UI optimization.
 
 ---
@@ -115,7 +115,9 @@ MONAD_TOKEN_CONTRACT=0x...       # RunRewardToken ($TRACKT) address
 
 Once `MONAD_TERRITORY_CONTRACT` is set, completed runs broadcast a real `claimTerritory` transaction to Monad Testnet automatically.
 
-> **Deployed contract addresses:** _TBD — add here with Monad Explorer links once the teammate verifies deployment._
+To build, test, and deploy the contracts, see [`contracts/README.md`](contracts/README.md).
+
+> **Deployed contract addresses:** _TBD — add here with Monad Explorer links once deployment is verified._
 
 ---
 
