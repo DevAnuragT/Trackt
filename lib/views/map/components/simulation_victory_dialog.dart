@@ -7,9 +7,13 @@ import '../../../services/simulation_service.dart';
 class SimulationVictoryDialog extends StatelessWidget {
   final SimulationResult result;
 
+  /// When false, the dialog frames the result as a real run rather than a demo.
+  final bool isSimulation;
+
   const SimulationVictoryDialog({
     super.key,
     required this.result,
+    this.isSimulation = true,
   });
 
   @override
@@ -53,14 +57,14 @@ class SimulationVictoryDialog extends StatelessWidget {
                           width: 1,
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 14),
-                          SizedBox(width: 4),
+                          const Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 14),
+                          const SizedBox(width: 4),
                           Text(
-                            'MONAD METROPOLIS DEMO',
-                            style: TextStyle(
+                            isSimulation ? 'MONAD METROPOLIS DEMO' : 'MONAD TESTNET',
+                            style: const TextStyle(
                               color: Color(0xFF00F5D4),
                               fontSize: 10,
                               fontWeight: FontWeight.bold,

@@ -19,6 +19,8 @@ import '../../views/map/components/bottom_sheet_widget.dart';
 import '../../services/samsung_permission_helper.dart';
 import '../../services/monad_service.dart';
 import '../../services/power_up_service.dart';
+import '../../services/simulation_service.dart';
+import '../../views/map/components/simulation_victory_dialog.dart';
 
 class RunTrackerController extends GetxController {
   // Dependencies
@@ -46,6 +48,10 @@ class RunTrackerController extends GetxController {
   final RxBool isSimulating = false.obs;
   final RxDouble simulationProgress = 0.0.obs;
   final RxString lastMonadTxHash = ''.obs; // Monad settlement proof of last claim
+  final RxBool lastMonadTxOnChain = false.obs; // whether last claim was a real tx
+  String? _lastClaimExplorerUrl; // explorer URL for the last claim
+  Future<void>? _pendingClaimFuture; // in-flight on-chain claim for the active run
+  bool _victoryShown = false; // suppress auto-nav when the victory dialog is up
   final RxInt rejectedGpsPoints = 0.obs; // Anti-cheat: count of implausible-speed rejects
   final RxInt lastRewardCoins = 0.obs; // $TRACKT awarded for the last completed run
   
@@ -973,10 +979,12 @@ class RunTrackerController extends GetxController {
     return earthRadius * c;
   }
 
-  /// Fire-and-forget dispatch of the completed territory to Monad Testnet.
-  /// Non-blocking and fully guarded: if MonadService isn't registered (e.g. in
-  /// widget tests) or the claim fails, the local flow is unaffected.
-  void _dispatchMonadClaim(Territory territory) {
+  /// Dispatch the completed territory to Monad Testnet. Returns a Future that
+  /// completes when the claim settles (real tx or local proof), so real-run
+  /// completion can await it before showing the victory dialog. Fully guarded:
+  /// if MonadService isn't registered (e.g. in widget tests) or the claim
+  /// fails, the local flow is unaffected.
+  Future<void> _dispatchMonadClaim(Territory territory) async {
     // Simulation claims are dispatched (and awaited) by SimulationService so the
     // victory dialog gets the real tx hash; skip here to avoid a double claim.
     if (isSimulating.value) {
@@ -989,21 +997,18 @@ class RunTrackerController extends GetxController {
     }
     try {
       final monad = Get.find<MonadService>();
-      monad
-          .claimTerritoryOnChain(
-            territoryId: territory.id,
-            centerLat: territory.center.latitude,
-            centerLng: territory.center.longitude,
-            areaSqMeters: territory.area,
-          )
-          .then((txHash) {
-        lastMonadTxHash.value = txHash;
-        print('⛓️ Monad territory claim settled: $txHash');
-      }).catchError((e) {
-        print('⚠️ Monad territory claim error: $e');
-      });
+      final txHash = await monad.claimTerritoryOnChain(
+        territoryId: territory.id,
+        centerLat: territory.center.latitude,
+        centerLng: territory.center.longitude,
+        areaSqMeters: territory.area,
+      );
+      lastMonadTxHash.value = txHash;
+      lastMonadTxOnChain.value = monad.lastTxOnChain.value;
+      _lastClaimExplorerUrl = monad.explorerTxUrl(txHash);
+      print('⛓️ Monad territory claim settled: $txHash');
     } catch (e) {
-      print('⚠️ Could not dispatch Monad claim: $e');
+      print('⚠️ Monad territory claim error: $e');
     }
   }
 
@@ -1029,6 +1034,39 @@ class RunTrackerController extends GetxController {
       print('💰 Awarded $coins \$TRACKT (x$mult) for completed run');
     } catch (e) {
       print('⚠️ Could not award run reward: $e');
+    }
+  }
+
+  /// Await the on-chain settlement, then show the victory dialog for a real run
+  /// (reusing the Judge-demo dialog, framed as a live claim). Guarded so a
+  /// missing service or context never breaks run completion.
+  Future<void> _showRealRunVictory(double area) async {
+    try {
+      await _pendingClaimFuture;
+    } catch (_) {}
+    try {
+      final result = SimulationResult(
+        presetTitle: 'Your Run',
+        city: 'Live Territory Claim',
+        areaM2: area,
+        distanceMeters: totalDistance.value,
+        duration: runDuration.value,
+        simulatedMonadTx:
+            lastMonadTxHash.value.isNotEmpty ? lastMonadTxHash.value : '0x—',
+        completedAt: DateTime.now(),
+        coinsEarned: lastRewardCoins.value > 0 ? lastRewardCoins.value : baseRunReward,
+        explorerUrl: _lastClaimExplorerUrl,
+        settledOnChain: lastMonadTxOnChain.value,
+      );
+      if (Get.context != null) {
+        _victoryShown = true;
+        Get.dialog(
+          SimulationVictoryDialog(result: result, isSimulation: false),
+          barrierDismissible: true,
+        );
+      }
+    } catch (e) {
+      print('⚠️ Could not show run victory dialog: $e');
     }
   }
 
@@ -1167,7 +1205,7 @@ class RunTrackerController extends GetxController {
       // Dispatch the territory claim to Monad Testnet (fire-and-forget so it
       // never blocks the UI or the local map update). Covers both real runs and
       // Judge simulation. Guarded so test environments without the service pass.
-      _dispatchMonadClaim(newTerritory);
+      _pendingClaimFuture = _dispatchMonadClaim(newTerritory);
       _awardRunReward();
 
       
@@ -1346,6 +1384,10 @@ class RunTrackerController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+
+      // Settle the on-chain claim, then celebrate the real run with the same
+      // victory dialog the Judge demo uses (framed as a live run).
+      await _showRealRunVictory(area);
     } else {
       Get.snackbar(
         'Territory Creation Failed',
@@ -1363,6 +1405,7 @@ class RunTrackerController extends GetxController {
       
       // Auto-navigate to main map after successful territory creation
       Future.delayed(const Duration(seconds: 1), () {
+        if (_victoryShown) return; // victory dialog's button handles navigation
         if (runState.value == RunState.finished) {
           print('🔄 Auto-navigating to main map after territory creation...');
           goToMainMap();
@@ -1981,6 +2024,7 @@ class RunTrackerController extends GetxController {
     isStartingRun.value = false; // Clear loading state
     isUploadingTerritory.value = false; // Clear territory upload state
     isSimulating.value = false;
+    _victoryShown = false;
     simulationProgress.value = 0.0;
     totalDistance.value = 0.0;
     runDuration.value = const Duration();
