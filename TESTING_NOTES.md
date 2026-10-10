@@ -23,3 +23,19 @@ Autonomous session log. Each feature below was implemented, unit/widget-tested, 
 - [ ] Run a Judge Sim in a seeded city → your territory draws on top of / beside rivals without crash.
 - [ ] Offline/airplane mode: rivals still appear (seeded locally, no network needed).
 
+## Victory dialog → real Monad settlement
+Sim victory now uses `MonadService` tx + explorer link.
+- [ ] Finish a Judge Sim → victory dialog tx hash matches the one in logs (`claim settled: 0x…`).
+- [ ] Tap **View on Monad Explorer** → opens `testnet.monadexplorer.com/tx/…` in browser (link valid once contracts deployed; local-proof hash until then).
+- [ ] Status line reads "Broadcast on-chain" only when a real tx went out; otherwise "Sub-second finality verified".
+- [ ] Copy-tx button still copies hash.
+
+## Monad wallet HUD pill
+`MonadWalletPill` on map, below Judge Demo button (top-left).
+- [ ] Pill shows short address `0x12…aB9c` + `$TRACKT` balance.
+- [ ] Tap pill → bottom sheet with full address (copy button), MON gas balance, $TRACKT, "View on Monad Explorer" (address page).
+- [ ] MON balance populates once wallet funded on testnet (0.00000 until then — expected).
+- [ ] Pill doesn't overlap map zoom controls (right side) or Judge button awkwardly — eyeball spacing on a real screen.
+
+
+

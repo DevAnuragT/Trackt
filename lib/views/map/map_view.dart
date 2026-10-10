@@ -9,6 +9,7 @@ import '../../services/location_service.dart';
 import 'components/map_controls_widget.dart';
 import 'components/bottom_sheet_widget.dart';
 import 'components/simulation_sheet.dart';
+import 'components/monad_wallet_pill.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -80,7 +81,14 @@ class _MapViewState extends State<MapView> {
               top: 16,
               child: _buildJudgeSimulatorButton(context),
             ),
-            
+
+            // Monad burner wallet pill (below the Judge Demo button)
+            const Positioned(
+              left: 16,
+              top: 62,
+              child: MonadWalletPill(),
+            ),
+
             // Bottom sheet with territory info and run controls
             const TerritoryBottomSheet(),
           ],
