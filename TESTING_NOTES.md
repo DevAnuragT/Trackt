@@ -69,6 +69,13 @@ Completing a run/sim now awards 100 $TRACKT (×2 while Speed Multiplier active).
 - [ ] Verify contract ABI matches `monad_service.dart` (it does: `claimTerritory(uint256,int256,int256,uint256)`, ERC-20 `balanceOf`).
 - [ ] (If coordinating with teammate) reconcile this registry with their design before mainnet — interface already matches the client.
 
+## Real-run victory dialog
+Finishing a real (non-sim) run now shows the same Monad victory dialog (badge reads "MONAD TESTNET"), after awaiting the on-chain claim.
+- [ ] Do a real/outdoor run that closes a loop → victory dialog appears with area, distance, +$TRACKT, and tx (explorer link if contracts deployed).
+- [ ] "View Territory on Map" button returns to the map (no double-navigation — auto-nav is suppressed while the dialog is up).
+- [ ] Balance increases by the awarded $TRACKT.
+
+
 
 
 
