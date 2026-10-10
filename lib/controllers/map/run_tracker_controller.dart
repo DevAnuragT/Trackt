@@ -18,6 +18,7 @@ import '../../services/run_storage_service.dart';
 import '../../views/map/components/bottom_sheet_widget.dart';
 import '../../services/samsung_permission_helper.dart';
 import '../../services/monad_service.dart';
+import '../../services/power_up_service.dart';
 
 class RunTrackerController extends GetxController {
   // Dependencies
@@ -46,6 +47,7 @@ class RunTrackerController extends GetxController {
   final RxDouble simulationProgress = 0.0.obs;
   final RxString lastMonadTxHash = ''.obs; // Monad settlement proof of last claim
   final RxInt rejectedGpsPoints = 0.obs; // Anti-cheat: count of implausible-speed rejects
+  final RxInt lastRewardCoins = 0.obs; // $TRACKT awarded for the last completed run
   
   // Path customization
   final Rx<Color> selectedPathColor = const Color(0xFF2196F3).obs;
@@ -1005,6 +1007,31 @@ class RunTrackerController extends GetxController {
     }
   }
 
+  /// Base $TRACKT reward for completing a run / conquering territory.
+  static const int baseRunReward = 100;
+
+  /// Award $TRACKT for a completed run, applying the Speed Multiplier power-up
+  /// if active. Skipped during simulation (SimulationService awards the sim
+  /// payout so the victory dialog reflects the exact amount). Guarded and non-
+  /// blocking so missing services never break run completion.
+  void _awardRunReward() {
+    if (isSimulating.value) return;
+    try {
+      int mult = 1;
+      if (Get.isRegistered<PowerUpService>()) {
+        mult = Get.find<PowerUpService>().rewardMultiplier;
+      }
+      final coins = baseRunReward * mult;
+      lastRewardCoins.value = coins;
+      if (Get.isRegistered<UserPreferencesService>()) {
+        Get.find<UserPreferencesService>().addUserCoins(coins);
+      }
+      print('💰 Awarded $coins \$TRACKT (x$mult) for completed run');
+    } catch (e) {
+      print('⚠️ Could not award run reward: $e');
+    }
+  }
+
   void _processTerritoryCreation() async {
     print('🚀 _processTerritoryCreation() method entered');
     
@@ -1141,6 +1168,7 @@ class RunTrackerController extends GetxController {
       // never blocks the UI or the local map update). Covers both real runs and
       // Judge simulation. Guarded so test environments without the service pass.
       _dispatchMonadClaim(newTerritory);
+      _awardRunReward();
 
       
       // Verify polygon closure

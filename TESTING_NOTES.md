@@ -53,6 +53,15 @@ Velocity filter in `RunTrackerController._onLocationUpdate`: GPS updates implyin
 - [ ] Judge Sim still completes normally (filter bypassed during sim) — turbo/demo/natural all finish.
 - [ ] (Pitch) `rejectedGpsPoints` can be surfaced in UI as "spoof attempts blocked" if you want a visible anti-cheat stat.
 
+## Reward loop (run → $TRACKT → shop) + Speed Multiplier effect
+Completing a run/sim now awards 100 $TRACKT (×2 while Speed Multiplier active). Closes the economy loop.
+- [ ] Finish a Judge Sim → wallet pill / profile `$TRACKT` balance goes **up by 100**.
+- [ ] Buy **Speed Multiplier** in Store, then finish another sim → balance goes up by **200** (2×). Victory dialog "Tokens Earned" shows +200.
+- [ ] After Speed Multiplier expires (1h) → back to +100.
+- [ ] Earn enough from a few sims → afford Shield/Flag without hand-editing coins.
+- [ ] NOTE: this partially wires the earlier "effects not enforced" gap — Speed Multiplier now has a real effect; Shield still pending conquest logic.
+
+
 
 
 

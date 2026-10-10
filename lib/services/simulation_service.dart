@@ -6,6 +6,8 @@ import 'package:geolocator/geolocator.dart' as geo;
 import '../controllers/map/run_tracker_controller.dart';
 import '../services/location_service.dart';
 import '../services/monad_service.dart';
+import '../services/power_up_service.dart';
+import '../services/user_preferences_service.dart';
 import '../views/run/run_page.dart';
 import '../views/map/components/simulation_victory_dialog.dart';
 
@@ -310,6 +312,20 @@ class SimulationService extends GetxService {
       }
       final simulatedTx = tx;
 
+      // Award $TRACKT for the simulated conquest, applying the Speed Multiplier
+      // power-up if active, so the shop economy loop is demonstrable end-to-end.
+      int coins = 100;
+      try {
+        if (Get.isRegistered<PowerUpService>()) {
+          coins = 100 * Get.find<PowerUpService>().rewardMultiplier;
+        }
+        if (Get.isRegistered<UserPreferencesService>()) {
+          await Get.find<UserPreferencesService>().addUserCoins(coins);
+        }
+      } catch (e) {
+        print('⚠️ Could not award simulation reward: $e');
+      }
+
       final result = SimulationResult(
         presetTitle: info.title,
         city: info.city,
@@ -318,7 +334,7 @@ class SimulationService extends GetxService {
         duration: dur.inSeconds > 0 ? dur : const Duration(minutes: 3, seconds: 45),
         simulatedMonadTx: simulatedTx,
         completedAt: DateTime.now(),
-        coinsEarned: 100,
+        coinsEarned: coins,
         explorerUrl: explorerUrl,
         settledOnChain: onChain,
       );

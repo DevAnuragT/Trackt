@@ -110,6 +110,10 @@ class PowerUpService extends GetxService {
     return ms > 0 ? Duration(milliseconds: ms) : null;
   }
 
+  /// \$TRACKT reward multiplier applied to run payouts: 2× while the Speed
+  /// Multiplier power-up is active, otherwise 1×.
+  int get rewardMultiplier => isActive('speed') ? 2 : 1;
+
   /// Attempt to buy [item], debiting \$TRACKT via [UserPreferencesService].
   Future<PurchaseResult> purchase(PowerUpItem item) async {
     try {
