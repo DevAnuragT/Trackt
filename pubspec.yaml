@@ -40,6 +40,9 @@ dependencies:
   google_sign_in: ^6.2.1
   http: ^1.5.0
   get: ^4.6.6
+
+  # Monad Web3 blockchain client (burner wallet + Testnet RPC dispatch)
+  web3dart: ^2.7.3
   
   # Map & Location dependencies
   mapbox_maps_flutter: ^2.0.0

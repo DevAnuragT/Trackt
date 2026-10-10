@@ -43,4 +43,23 @@ class EnvConfig {
 
   // Google Sign-In (native)
   static String? get googleServerClientId => dotenv.maybeGet('GOOGLE_SERVER_CLIENT_ID');
+
+  // Monad Testnet Web3 (Chain ID 143)
+  static String? _maybe(String key) {
+    try {
+      return dotenv.maybeGet(key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String get monadRpcUrl =>
+      _maybe('MONAD_RPC_URL') ?? 'https://testnet-rpc.monad.xyz';
+  static int get monadChainId => int.tryParse(_maybe('MONAD_CHAIN_ID') ?? '') ?? 143;
+
+  // Deployed contract addresses (supplied by teammate once verified on Monad Testnet).
+  // Empty until deployment; MonadService degrades to local proof when unset.
+  static String get monadTerritoryContract =>
+      _maybe('MONAD_TERRITORY_CONTRACT') ?? '';
+  static String get monadTokenContract => _maybe('MONAD_TOKEN_CONTRACT') ?? '';
 }

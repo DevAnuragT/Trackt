@@ -17,6 +17,7 @@ import '../../core/enums/run_state.dart';
 import '../../services/run_storage_service.dart';
 import '../../views/map/components/bottom_sheet_widget.dart';
 import '../../services/samsung_permission_helper.dart';
+import '../../services/monad_service.dart';
 
 class RunTrackerController extends GetxController {
   // Dependencies
@@ -43,6 +44,7 @@ class RunTrackerController extends GetxController {
   // Simulation mode for Judge and Demo testing
   final RxBool isSimulating = false.obs;
   final RxDouble simulationProgress = 0.0.obs;
+  final RxString lastMonadTxHash = ''.obs; // Monad settlement proof of last claim
   
   // Path customization
   final Rx<Color> selectedPathColor = const Color(0xFF2196F3).obs;
@@ -942,6 +944,34 @@ class RunTrackerController extends GetxController {
     return earthRadius * c;
   }
 
+  /// Fire-and-forget dispatch of the completed territory to Monad Testnet.
+  /// Non-blocking and fully guarded: if MonadService isn't registered (e.g. in
+  /// widget tests) or the claim fails, the local flow is unaffected.
+  void _dispatchMonadClaim(Territory territory) {
+    if (!Get.isRegistered<MonadService>()) {
+      print('⛓️ MonadService not registered, skipping on-chain claim');
+      return;
+    }
+    try {
+      final monad = Get.find<MonadService>();
+      monad
+          .claimTerritoryOnChain(
+            territoryId: territory.id,
+            centerLat: territory.center.latitude,
+            centerLng: territory.center.longitude,
+            areaSqMeters: territory.area,
+          )
+          .then((txHash) {
+        lastMonadTxHash.value = txHash;
+        print('⛓️ Monad territory claim settled: $txHash');
+      }).catchError((e) {
+        print('⚠️ Monad territory claim error: $e');
+      });
+    } catch (e) {
+      print('⚠️ Could not dispatch Monad claim: $e');
+    }
+  }
+
   void _processTerritoryCreation() async {
     print('🚀 _processTerritoryCreation() method entered');
     
@@ -1073,7 +1103,12 @@ class RunTrackerController extends GetxController {
         center: center,
         ownerColor: ownerColor,
       );
-      
+
+      // Dispatch the territory claim to Monad Testnet (fire-and-forget so it
+      // never blocks the UI or the local map update). Covers both real runs and
+      // Judge simulation. Guarded so test environments without the service pass.
+      _dispatchMonadClaim(newTerritory);
+
       
       // Verify polygon closure
       print('🗺️ Polygon closure verification:');
