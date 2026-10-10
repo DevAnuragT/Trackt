@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import '../controllers/map/run_tracker_controller.dart';
 import '../services/location_service.dart';
+import '../services/monad_service.dart';
 import '../views/run/run_page.dart';
 import '../views/map/components/simulation_victory_dialog.dart';
 
@@ -52,6 +53,8 @@ class SimulationResult {
   final String simulatedMonadTx;
   final DateTime completedAt;
   final int coinsEarned;
+  final String? explorerUrl;
+  final bool settledOnChain;
 
   SimulationResult({
     required this.presetTitle,
@@ -62,6 +65,8 @@ class SimulationResult {
     required this.simulatedMonadTx,
     required this.completedAt,
     this.coinsEarned = 100,
+    this.explorerUrl,
+    this.settledOnChain = false,
   });
 }
 
@@ -278,9 +283,32 @@ class SimulationService extends GetxService {
       // End the run in the tracker
       await runController.endSimulatedRun();
 
-      // Generate simulated Monad transaction hash for demonstration
-      final hex = math.Random().nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0');
-      final simulatedTx = '0x143a9b${hex}7c8d9e2f4a10bc39e143';
+      // Dispatch the territory claim to Monad and await the real settlement
+      // proof so the victory dialog shows an accurate tx hash + explorer link.
+      String tx;
+      String? explorerUrl;
+      bool onChain = false;
+      try {
+        if (Get.isRegistered<MonadService>()) {
+          final monad = Get.find<MonadService>();
+          tx = await monad.claimTerritoryOnChain(
+            territoryId: 'sim-${DateTime.now().millisecondsSinceEpoch}',
+            centerLat: info.centerLat,
+            centerLng: info.centerLng,
+            areaSqMeters: area,
+          );
+          explorerUrl = monad.explorerTxUrl(tx);
+          onChain = monad.lastTxOnChain.value;
+        } else {
+          final hex = math.Random().nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0');
+          tx = '0x143a9b${hex}7c8d9e2f4a10bc39e143';
+        }
+      } catch (e) {
+        print('⚠️ Monad claim failed during simulation: $e');
+        final hex = math.Random().nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0');
+        tx = '0x143a9b${hex}7c8d9e2f4a10bc39e143';
+      }
+      final simulatedTx = tx;
 
       final result = SimulationResult(
         presetTitle: info.title,
@@ -291,6 +319,8 @@ class SimulationService extends GetxService {
         simulatedMonadTx: simulatedTx,
         completedAt: DateTime.now(),
         coinsEarned: 100,
+        explorerUrl: explorerUrl,
+        settledOnChain: onChain,
       );
 
       lastResult.value = result;

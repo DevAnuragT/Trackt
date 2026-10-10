@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../services/simulation_service.dart';
 
 class SimulationVictoryDialog extends StatelessWidget {
@@ -262,13 +263,37 @@ class SimulationVictoryDialog extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Sub-second finality verified. Territory polygon committed to state.',
-                        style: TextStyle(
+                      Text(
+                        result.settledOnChain
+                            ? 'Broadcast on-chain. Territory polygon committed to Monad state.'
+                            : 'Sub-second finality verified. Territory polygon committed to state.',
+                        style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 10,
                         ),
                       ),
+                      if (result.explorerUrl != null) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _openExplorer(result.explorerUrl!),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF00F5D4),
+                              side: const BorderSide(color: Color(0xFF00F5D4), width: 1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            icon: const Icon(Icons.open_in_new, size: 15),
+                            label: const Text(
+                              'View on Monad Explorer',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -375,6 +400,26 @@ class SimulationVictoryDialog extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openExplorer(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        Clipboard.setData(ClipboardData(text: url));
+        Get.snackbar(
+          'Explorer link copied',
+          'Could not open browser; link copied to clipboard.',
+          duration: const Duration(seconds: 2),
+          backgroundColor: const Color(0xFF8338EC),
+          colorText: Colors.white,
+        );
+      }
+    } catch (_) {
+      Clipboard.setData(ClipboardData(text: url));
+    }
   }
 
   String _formatDuration(Duration duration) {

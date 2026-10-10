@@ -948,6 +948,12 @@ class RunTrackerController extends GetxController {
   /// Non-blocking and fully guarded: if MonadService isn't registered (e.g. in
   /// widget tests) or the claim fails, the local flow is unaffected.
   void _dispatchMonadClaim(Territory territory) {
+    // Simulation claims are dispatched (and awaited) by SimulationService so the
+    // victory dialog gets the real tx hash; skip here to avoid a double claim.
+    if (isSimulating.value) {
+      print('⛓️ Simulation claim handled by SimulationService, skipping controller dispatch');
+      return;
+    }
     if (!Get.isRegistered<MonadService>()) {
       print('⛓️ MonadService not registered, skipping on-chain claim');
       return;

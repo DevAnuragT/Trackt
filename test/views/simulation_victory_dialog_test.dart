@@ -55,4 +55,49 @@ void main() {
     expect(find.text('View Territory on Map'), findsOneWidget);
     expect(find.text('Close Details'), findsOneWidget);
   });
+
+  testWidgets('SimulationVictoryDialog shows explorer button when explorerUrl set', (WidgetTester tester) async {
+    final result = SimulationResult(
+      presetTitle: 'Hyde Park Serpentine',
+      city: 'London, UK',
+      areaM2: 15000.0,
+      distanceMeters: 480.0,
+      duration: const Duration(minutes: 2, seconds: 30),
+      simulatedMonadTx: '0xabc123',
+      completedAt: DateTime.now(),
+      coinsEarned: 100,
+      explorerUrl: 'https://testnet.monadexplorer.com/tx/0xabc123',
+      settledOnChain: true,
+    );
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(body: SimulationVictoryDialog(result: result)),
+      ),
+    );
+
+    expect(find.text('View on Monad Explorer'), findsOneWidget);
+    expect(find.textContaining('Broadcast on-chain'), findsOneWidget);
+  });
+
+  testWidgets('SimulationVictoryDialog hides explorer button when explorerUrl null', (WidgetTester tester) async {
+    final result = SimulationResult(
+      presetTitle: 'The Presidio Coast',
+      city: 'San Francisco, USA',
+      areaM2: 15000.0,
+      distanceMeters: 510.0,
+      duration: const Duration(minutes: 2, seconds: 50),
+      simulatedMonadTx: '0xdef456',
+      completedAt: DateTime.now(),
+      coinsEarned: 100,
+    );
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(body: SimulationVictoryDialog(result: result)),
+      ),
+    );
+
+    expect(find.text('View on Monad Explorer'), findsNothing);
+  });
 }
