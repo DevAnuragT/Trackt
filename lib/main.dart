@@ -11,6 +11,7 @@ import 'services/location_permission_service.dart';
 import 'services/run_storage_service.dart';
 import 'services/run_history_service.dart';
 import 'services/territory_service.dart';
+import 'services/seed_territory_service.dart';
 import 'services/user_preferences_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/database_service.dart';
@@ -56,6 +57,7 @@ Future<void> main() async {
     Get.put(LocationPermissionService(), permanent: true);
     Get.put(RunStorageService());
     Get.put(TerritoryHistoryService());
+    Get.put(SeedTerritoryService());
     Get.put(TerritoryService());
     Get.put(AuthController());
     Get.put(DatabaseService());

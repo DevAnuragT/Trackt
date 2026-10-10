@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 import '../models/territory/territory_model.dart';
 import '../services/database_service.dart';
 import '../services/location_service.dart';
+import '../services/seed_territory_service.dart';
 import '../views/map/components/bottom_sheet_widget.dart';
 // import 'dart:math' as math;
 
@@ -83,6 +84,10 @@ class TerritoryService extends GetxService {
     isOfflineMode.value = !isConnected;
     
     print('✅ TerritoryService initialized (${isConnected ? 'Online' : 'Offline'})');
+
+    // Seed rival territories immediately so the battlefield is populated even
+    // offline / before any location fix.
+    _mergeSeededRivals();
     
     // Auto-sync if online and have pending uploads
     if (isConnected && pendingTerritoryUploads.isNotEmpty) {
@@ -124,6 +129,8 @@ class TerritoryService extends GetxService {
         ..clear()
         ..addAll(territories);
 
+      _mergeSeededRivals(centerLat, centerLng);
+
       print('✅ Fetched ${territories.length} territories within ${radiusMeters}m');
     } catch (e) {
       print('❌ Error fetching territories within radius: $e');
@@ -156,7 +163,8 @@ class TerritoryService extends GetxService {
       // Update reactive list
       nearbyTerritories.clear();
       nearbyTerritories.addAll(territories);
-      
+      _mergeSeededRivals(currentPosition.latitude, currentPosition.longitude);
+
       print('✅ Refreshed nearby territories: ${territories.length} found');
       
     } catch (e) {
@@ -222,7 +230,8 @@ class TerritoryService extends GetxService {
       // Update reactive list
       nearbyTerritories.clear();
       nearbyTerritories.addAll(territories);
-      
+      _mergeSeededRivals(currentPosition.latitude, currentPosition.longitude);
+
       print('✅ Refreshed nearby territories for map display: ${territories.length} found with proper layering');
       
       // Cache the results locally
@@ -406,7 +415,8 @@ class TerritoryService extends GetxService {
       // Update reactive list
       nearbyTerritories.clear();
       nearbyTerritories.addAll(territories);
-      
+      _mergeSeededRivals(latitude, longitude);
+
       print('✅ Refreshed territories for new location: ${territories.length} found at $latitude, $longitude');
       
       // Don't cache territories for different locations - only keep current view
@@ -419,6 +429,27 @@ class TerritoryService extends GetxService {
       await refreshNearbyTerritories();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Merge seeded rival territories into the nearby display list so the map
+  /// always looks like a live battlefield. Additive and de-duplicated; pass a
+  /// center to only pull rivals near that point, or null for the full global set.
+  void _mergeSeededRivals([double? lat, double? lng]) {
+    try {
+      if (!Get.isRegistered<SeedTerritoryService>()) return;
+      final seed = Get.find<SeedTerritoryService>();
+      final List<Territory> rivals = (lat != null && lng != null)
+          ? seed.near(lat, lng, radiusMeters: defaultRadiusMeters.toDouble())
+          : seed.buildAll();
+      final existing = nearbyTerritories.map((t) => t.id).toSet();
+      final toAdd = rivals.where((t) => !existing.contains(t.id)).toList();
+      if (toAdd.isNotEmpty) {
+        nearbyTerritories.addAll(toAdd);
+        print('🌍 Merged ${toAdd.length} seeded rival territories into map');
+      }
+    } catch (e) {
+      print('⚠️ Could not merge seeded rivals: $e');
     }
   }
 
