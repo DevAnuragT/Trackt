@@ -46,6 +46,14 @@ Sim victory now uses `MonadService` tx + explorer link.
 - [ ] Kill + relaunch app → purchased power-ups still active (persisted).
 - [ ] NOTE / known gap: purchases are tracked but gameplay **effects aren't enforced yet** (shield doesn't yet block theft, speed doesn't yet 2× rewards). Economy + UI only for now — flag if you want effects wired next.
 
+## P3 — Anti-cheat "Proof of Physical Movement"
+Velocity filter in `RunTrackerController._onLocationUpdate`: GPS updates implying > 25 km/h rejected (not counted toward distance). `rejectedGpsPoints` observable tracks count. Skipped during simulation.
+- [ ] Real outdoor run: normal pace tracked fine, no false rejects (watch logs for `🚫 Anti-cheat` — should be rare/none while running).
+- [ ] In a car / spoofed GPS: updates rejected, distance doesn't balloon.
+- [ ] Judge Sim still completes normally (filter bypassed during sim) — turbo/demo/natural all finish.
+- [ ] (Pitch) `rejectedGpsPoints` can be surfaced in UI as "spoof attempts blocked" if you want a visible anti-cheat stat.
+
+
 
 
 

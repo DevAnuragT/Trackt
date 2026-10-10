@@ -45,6 +45,7 @@ class RunTrackerController extends GetxController {
   final RxBool isSimulating = false.obs;
   final RxDouble simulationProgress = 0.0.obs;
   final RxString lastMonadTxHash = ''.obs; // Monad settlement proof of last claim
+  final RxInt rejectedGpsPoints = 0.obs; // Anti-cheat: count of implausible-speed rejects
   
   // Path customization
   final Rx<Color> selectedPathColor = const Color(0xFF2196F3).obs;
@@ -80,6 +81,17 @@ class RunTrackerController extends GetxController {
   // Noise filtering - made more lenient for testing
   static const double _maxAccuracy = 50.0; // meters - more lenient for testing
   static const double _minDistanceThreshold = 1.0; // meters - more sensitive for testing
+  // Anti-cheat: reject GPS updates implying speeds above a human running cap.
+  // 25 km/h ≈ 6.944 m/s — eliminates vehicle driving and GPS teleport spoofs.
+  static const double _maxRunningSpeedMps = 25 * 1000 / 3600;
+
+  /// Anti-cheat test: true when [distanceMeters] over [dtSeconds] implies a
+  /// speed above the human running cap (25 km/h). Non-positive dt returns false
+  /// (cannot judge). Pure + static so it's unit-testable without a controller.
+  static bool isImplausibleRunningSpeed(double distanceMeters, double dtSeconds) {
+    if (dtSeconds <= 0) return false;
+    return (distanceMeters / dtSeconds) > _maxRunningSpeedMps;
+  }
   
   @override
   void onInit() {
@@ -763,7 +775,22 @@ class RunTrackerController extends GetxController {
         print('⏭️ Too close to last position (${distance.toStringAsFixed(2)}m < ${_minDistanceThreshold}m), skipping');
         return; // Too close, skip this update
       }
-      
+
+      // Anti-cheat "Proof of Physical Movement": reject updates implying a
+      // speed faster than a human can run. Skipped during Judge simulation
+      // (synthetic timestamps intentionally compress a real-paced loop).
+      if (!isSimulating.value) {
+        final dtSeconds =
+            position.timestamp.difference(_lastPosition!.timestamp).inMilliseconds / 1000.0;
+        if (isImplausibleRunningSpeed(distance, dtSeconds)) {
+          rejectedGpsPoints.value++;
+          final speedKmh = (distance / dtSeconds) * 3.6;
+          print('🚫 Anti-cheat: rejected implausible speed '
+              '${speedKmh.toStringAsFixed(1)} km/h (> 25 km/h), skipping');
+          return; // Likely a vehicle or spoofed teleport; do not count it.
+        }
+      }
+
       // Update total distance
       double oldDistance = totalDistance.value;
       totalDistance.value += distance;
