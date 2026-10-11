@@ -84,6 +84,17 @@ From a full app scan. Functional fixes + cohesion.
 - [ ] Removed dead screens (AddPasswordView, NotificationsSection) — nothing should navigate to them; confirm no broken links.
 - [ ] Known-minor (not blocking): Daily Quests is one focused challenge card; `coins_earned_animation.dart` exists but is unwired; conquest/Shield still backend-scoped.
 
+## UI/UX polish pass (modern simplistic look)
+Global theme + per-screen Monad palette. Visual only — verify on device.
+- [ ] Buttons across the app look consistent: rounded (14), purple primary / cyan outline, ~48px tall, no harsh elevation. Check Start Run (map), Shop buy buttons, auth sign-in/up, dialogs.
+- [ ] Text fields (auth, username, create club) are filled dark rounded with a purple focus ring.
+- [ ] Cards, bottom sheets, and dialogs share rounded corners + the dark surface (#1C1733 / #181528).
+- [ ] Map HUD: Start Run button is purple with a play icon; zoom/recenter controls are dark-glass (recenter = cyan); Judge Demo + wallet pills consistent.
+- [ ] Live run stats card uses cyan/amber/purple metrics (not blue/green/orange).
+- [ ] No leftover bright-blue Material accents on primary surfaces (swapped to Monad purple/cyan). Semantic red (stop) / green (go) on run controls intentionally kept.
+- [ ] Nothing clipped or overflowing at phone width after the spacing/compactness changes.
+
+
 
 
 
