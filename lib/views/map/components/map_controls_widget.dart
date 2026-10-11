@@ -13,48 +13,50 @@ class MapControlsWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 80), // Shift controls upward
       child: Column(
         children: [
-          // Zoom In button
-          Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: FloatingActionButton(
-              mini: true,
-              heroTag: "zoom_in_btn", // Unique hero tag
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              onPressed: mapController.zoomIn,
-              child: const Icon(Icons.add),
-            ),
+          _controlButton(
+            tag: 'zoom_in_btn',
+            icon: Icons.add,
+            onPressed: mapController.zoomIn,
           ),
-          
-          // Zoom Out button
-          Container(
-            margin: const EdgeInsets.only(bottom: 5),
-            child: FloatingActionButton(
-              mini: true,
-              heroTag: "zoom_out_btn", // Unique hero tag
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              onPressed: mapController.zoomOut,
-              child: const Icon(Icons.remove),
-            ),
+          const SizedBox(height: 8),
+          _controlButton(
+            tag: 'zoom_out_btn',
+            icon: Icons.remove,
+            onPressed: mapController.zoomOut,
           ),
-          
-          // Recenter to user location button
-          Container(
-            margin: const EdgeInsets.only(bottom: 5),
-            child: FloatingActionButton(
-              mini: true,
-              heroTag: "recenter_btn", // Unique hero tag
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              onPressed: mapController.moveToUserLocation,
-              child: const Icon(Icons.my_location),
-            ),
+          const SizedBox(height: 8),
+          _controlButton(
+            tag: 'recenter_btn',
+            icon: Icons.my_location,
+            onPressed: mapController.moveToUserLocation,
+            accent: true,
           ),
-          
-          // Removed map refresh button as per requirements
         ],
       ),
+    );
+  }
+
+  Widget _controlButton({
+    required String tag,
+    required IconData icon,
+    required VoidCallback onPressed,
+    bool accent = false,
+  }) {
+    return FloatingActionButton(
+      mini: true,
+      heroTag: tag,
+      elevation: 0,
+      backgroundColor: const Color(0xFF181528).withValues(alpha: 0.92),
+      foregroundColor: accent ? const Color(0xFF00F5D4) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: (accent ? const Color(0xFF00F5D4) : Colors.white)
+              .withValues(alpha: 0.25),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Icon(icon, size: 20),
     );
   }
 }
