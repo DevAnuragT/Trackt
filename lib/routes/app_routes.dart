@@ -9,6 +9,8 @@ import '../views/setup/first_launch_setup_page.dart';
 import '../views/setup/app_intro_page.dart';
 import '../views/profile/run_history_page.dart';
 import '../views/profile/notifications_page.dart';
+import '../views/auth/reset_password_request_view.dart';
+import '../views/auth/reset_password_verify_view.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -22,6 +24,7 @@ class AppRoutes {
   static const String notifications = '/notifications';
   static const String otpVerification = '/otp-verification';
   static const String resetPasswordRequest = '/reset-password-request';
+  static const String resetPasswordVerify = '/reset-password-verify';
   // Removed add password route
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -67,6 +70,16 @@ class AppRoutes {
         final email = args?['email'] as String? ?? '';
         return MaterialPageRoute(
           builder: (_) => OTPVerificationView(email: email),
+        );
+      case resetPasswordRequest:
+        return MaterialPageRoute(
+          builder: (_) => const ResetPasswordRequestView(),
+        );
+      case resetPasswordVerify:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final email = args?['email'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => ResetPasswordVerifyView(email: email),
         );
   // Removed AddPasswordView route
       default:
