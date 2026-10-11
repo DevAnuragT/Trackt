@@ -21,19 +21,9 @@ class MonadWalletPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF17171A).withValues(alpha: 0.94),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF6366F1).withValues(alpha: 0.7),
-            width: 1.3,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.22),
-              blurRadius: 12,
-              spreadRadius: 1,
-            ),
-          ],
+          color: const Color(0xFF17171A),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF2A2A2F)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

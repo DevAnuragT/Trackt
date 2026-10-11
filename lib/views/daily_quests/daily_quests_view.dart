@@ -41,21 +41,13 @@ class DailyQuestsView extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        colors: completed
-                            ? [Colors.green[600]!, Colors.green[400]!]
-                            : [const Color(0xFF6366F1), const Color(0xFF6366F1)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color(0xFF17171A),
+                      border: Border.all(
+                        color: completed
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFF2A2A2F),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

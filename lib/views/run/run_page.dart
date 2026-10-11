@@ -153,19 +153,9 @@ class _RunPageState extends State<RunPageAutoStart> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF161228).withValues(alpha: 0.95),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFF6366F1),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.4),
-              blurRadius: 16,
-              spreadRadius: 1,
-            ),
-          ],
+          color: const Color(0xFF17171A),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF2A2A2F)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

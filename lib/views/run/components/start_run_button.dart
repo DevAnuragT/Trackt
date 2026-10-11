@@ -114,17 +114,10 @@ class _CountdownStartButtonState extends State<CountdownStartButton> with Ticker
     return Container(
       height: 50,
       decoration: BoxDecoration(
-        color: (widget.isLoading || _isCountingDown) 
-            ? widget.backgroundColor.withOpacity(0.6) 
+        color: (widget.isLoading || _isCountingDown)
+            ? widget.backgroundColor.withOpacity(0.6)
             : widget.backgroundColor,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: widget.buttonColor.withOpacity((widget.isLoading || _isCountingDown) ? 0.1 : 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Material(
         color: Colors.transparent,

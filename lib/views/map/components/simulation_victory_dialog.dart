@@ -24,18 +24,8 @@ class SimulationVictoryDialog extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF17171A),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF6366F1).withValues(alpha: 0.6),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.35),
-              blurRadius: 30,
-              spreadRadius: 2,
-            ),
-          ],
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF2A2A2F)),
         ),
         child: SingleChildScrollView(
           child: Padding(
@@ -50,12 +40,8 @@ class SimulationVictoryDialog extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6366F1).withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.8),
-                          width: 1,
-                        ),
+                        color: const Color(0xFF202024),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -86,27 +72,17 @@ class SimulationVictoryDialog extends StatelessWidget {
 
                 // Trophy / Celebratory Icon
                 Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
+                  width: 64,
+                  height: 64,
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6366F1), Color(0xFF6366F1)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF6366F1).withValues(alpha: 0.5),
-                        blurRadius: 18,
-                      ),
-                    ],
+                    color: Color(0xFF202024),
                   ),
                   child: const Center(
                     child: Icon(
-                      Icons.emoji_events,
-                      color: Colors.amberAccent,
-                      size: 40,
+                      Icons.emoji_events_outlined,
+                      color: Color(0xFF6366F1),
+                      size: 34,
                     ),
                   ),
                 ),
