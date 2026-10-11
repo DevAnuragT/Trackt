@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../services/simulation_service.dart';
 
 class SimulationSheet extends StatefulWidget {
@@ -24,20 +25,12 @@ class _SimulationSheetState extends State<SimulationSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F0F11),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: const Color(0xFF6366F1).withValues(alpha: 0.5),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6366F1).withValues(alpha: 0.25),
-            blurRadius: 25,
-            offset: const Offset(0, -4),
-          ),
-        ],
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.9,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         top: false,
@@ -54,7 +47,7 @@ class _SimulationSheetState extends State<SimulationSheet> {
                   width: 44,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: AppColors.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -65,66 +58,46 @@ class _SimulationSheetState extends State<SimulationSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Expanded(
+                    child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                          color: AppColors.surfaceVariant,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF6366F1),
-                            width: 1,
-                          ),
                         ),
                         child: const Icon(
-                          Icons.science,
-                          color: Color(0xFF6366F1),
+                          Icons.science_outlined,
+                          color: AppColors.accent,
                           size: 20,
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      const Expanded(
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Judge Simulation Lab',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           Text(
                             'Metropolis Evaluation Engine',
                             style: TextStyle(
-                              color: Colors.white60,
+                              color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           ),
                         ],
                       ),
+                      ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFF6366F1).withValues(alpha: 0.5),
-                        width: 1,
-                      ),
-                    ),
-                    child: const Text(
-                      'MONAD TESTNET',
-                      style: TextStyle(
-                        color: Color(0xFF6366F1),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.6,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -219,20 +192,28 @@ class _SimulationSheetState extends State<SimulationSheet> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      preset.title,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    Flexible(
+                                      child: Text(
+                                        preset.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 6),
-                                    Text(
-                                      '(${preset.city})',
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 11,
+                                    Flexible(
+                                      child: Text(
+                                        '(${preset.city})',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 11,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -318,12 +299,11 @@ class _SimulationSheetState extends State<SimulationSheet> {
                     await simService.launchSimulation(context: context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
-                    foregroundColor: Colors.white,
-                    elevation: 6,
-                    shadowColor: const Color(0xFF6366F1).withValues(alpha: 0.6),
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.onAccent,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: const Row(

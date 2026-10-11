@@ -31,7 +31,6 @@ void main() {
     // Verify Header Elements
     expect(find.text('Judge Simulation Lab'), findsOneWidget);
     expect(find.text('Metropolis Evaluation Engine'), findsOneWidget);
-    expect(find.text('MONAD TESTNET'), findsOneWidget);
 
     // Verify Presets are listed
     expect(find.text('Central Park Great Lawn'), findsOneWidget);
