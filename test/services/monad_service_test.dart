@@ -15,7 +15,7 @@ void main() {
 
       expect(service.walletAddress.value, isNotEmpty);
       expect(service.walletAddress.value, startsWith('0x'));
-      expect(service.chainId, 143);
+      expect(service.chainId, 10143);
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('monad_burner_private_key'), isNotNull);

@@ -47,7 +47,7 @@ void main() {
     expect(find.text('+100 \$TRACKT'), findsOneWidget);
 
     // Verify Monad Testnet Section
-    expect(find.text('Monad Testnet (Chain ID 143)'), findsOneWidget);
+    expect(find.text('Monad Testnet (Chain ID 10143)'), findsOneWidget);
     expect(find.text('10,000 TPS'), findsOneWidget);
     expect(find.textContaining('0x143a9b'), findsOneWidget);
 
