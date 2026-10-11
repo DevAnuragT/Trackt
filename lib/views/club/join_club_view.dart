@@ -82,10 +82,10 @@ class _JoinClubViewState extends State<JoinClubView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
+      backgroundColor: const Color(0xFF141124),
       appBar: AppBar(
         title: const Text('Join Club'),
-        backgroundColor: Colors.black87,
+        backgroundColor: const Color(0xFF141124),
         foregroundColor: Colors.white,
         elevation: 0,
       ),

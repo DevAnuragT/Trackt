@@ -73,10 +73,10 @@ class _CreateClubViewState extends State<CreateClubView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black87,
+      backgroundColor: const Color(0xFF141124),
       appBar: AppBar(
         title: const Text('Create Club'),
-        backgroundColor: Colors.black87,
+        backgroundColor: const Color(0xFF141124),
         foregroundColor: Colors.white,
         elevation: 0,
       ),

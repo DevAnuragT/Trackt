@@ -186,7 +186,7 @@ class _ProfileViewState extends State<ProfileView> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: Colors.grey[900],
+          backgroundColor: const Color(0xFF141124),
           title: const Text(
             'Pick a custom color',
             style: TextStyle(color: Colors.white),
@@ -245,7 +245,7 @@ class _ProfileViewState extends State<ProfileView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: const Color(0xFF141124),
         title: const Text(
           'Change Territory Color',
           style: TextStyle(color: Colors.white, fontSize: 18),

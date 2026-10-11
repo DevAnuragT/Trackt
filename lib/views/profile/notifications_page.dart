@@ -10,10 +10,10 @@ class NotificationsPage extends StatelessWidget {
     final NotificationService service = Get.find<NotificationService>();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF141124),
       appBar: AppBar(
         title: const Text('Notifications'),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF141124),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
