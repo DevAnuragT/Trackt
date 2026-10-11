@@ -12,9 +12,9 @@ class RunStatsWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1733).withOpacity(0.95),
+        color: const Color(0xFF17171A).withOpacity(0.95),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF8338EC).withOpacity(0.3), width: 1),
+        border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3), width: 1),
       ),
       child: Obx(() => Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -23,19 +23,19 @@ class RunStatsWidget extends StatelessWidget {
             'Distance',
             '${(runController.totalDistance.value / 1000).toStringAsFixed(2)} km', // Convert meters to km
             Icons.straighten,
-            const Color(0xFF00F5D4),
+            const Color(0xFF6366F1),
           ),
           _buildStatItem(
             'Duration',
             _formatDuration(runController.runDuration.value),
             Icons.timer,
-            const Color(0xFFFFBE0B),
+            const Color(0xFFA1A1AA),
           ),
           _buildStatItem(
             'Speed',
             '${_calculateSpeed(runController.totalDistance.value / 1000, runController.runDuration.value).toStringAsFixed(1)} km/h', // Use km for calculation
             Icons.speed,
-            const Color(0xFF8338EC),
+            const Color(0xFF6366F1),
           ),
         ],
       )),

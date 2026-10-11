@@ -125,7 +125,7 @@ class _SignInViewState extends State<SignInView> {
                   const SizedBox(height: 30),
                   const Icon(
                     Icons.favorite_border,
-                    color: const Color(0xFF8338EC),
+                    color: const Color(0xFF6366F1),
                     size: 80,
                   ),
                   const SizedBox(height: 20),
@@ -221,7 +221,7 @@ class _SignInViewState extends State<SignInView> {
                     child: Obx(() => ElevatedButton(
                       onPressed: authController.isLoading ? null : _signInWithEmail,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8338EC),
+                        backgroundColor: const Color(0xFF6366F1),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -334,7 +334,7 @@ class _SignInViewState extends State<SignInView> {
                         onPressed: () => Get.toNamed('/signup'),
                         child: const Text(
                           'Sign Up',
-                          style: TextStyle(color: const Color(0xFF8338EC)),
+                          style: TextStyle(color: const Color(0xFF6366F1)),
                         ),
                       )
                     ],

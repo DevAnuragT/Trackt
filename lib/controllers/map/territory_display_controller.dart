@@ -724,7 +724,7 @@ class _TerritoryInfoBottomSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
+        color: const Color(0xFF202024),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

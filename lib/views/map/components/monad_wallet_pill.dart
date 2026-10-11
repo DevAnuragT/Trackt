@@ -21,15 +21,15 @@ class MonadWalletPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF161224).withValues(alpha: 0.94),
+          color: const Color(0xFF17171A).withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF00F5D4).withValues(alpha: 0.7),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.7),
             width: 1.3,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00F5D4).withValues(alpha: 0.22),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.22),
               blurRadius: 12,
               spreadRadius: 1,
             ),
@@ -38,7 +38,7 @@ class MonadWalletPill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.account_balance_wallet, color: Color(0xFF00F5D4), size: 15),
+            const Icon(Icons.account_balance_wallet, color: Color(0xFF6366F1), size: 15),
             const SizedBox(width: 6),
             Obx(() => Text(
                   monad.walletAddress.value.isEmpty ? 'Wallet' : monad.shortAddress,
@@ -53,7 +53,7 @@ class MonadWalletPill extends StatelessWidget {
             Obx(() => Text(
                   '${monad.tracktBalance.value.toStringAsFixed(0)} \$TRACKT',
                   style: const TextStyle(
-                    color: Color(0xFF00F5D4),
+                    color: Color(0xFF6366F1),
                     fontWeight: FontWeight.bold,
                     fontSize: 11,
                   ),
@@ -69,7 +69,7 @@ class MonadWalletPill extends StatelessWidget {
       Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
-          color: Color(0xFF181528),
+          color: Color(0xFF17171A),
           borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
         ),
         child: Column(
@@ -78,7 +78,7 @@ class MonadWalletPill extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 18),
+                const Icon(Icons.bolt, color: Color(0xFF6366F1), size: 18),
                 const SizedBox(width: 6),
                 const Text(
                   'Monad Session Wallet',
@@ -88,12 +88,12 @@ class MonadWalletPill extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8338EC).withValues(alpha: 0.25),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'Chain ${monad.chainId}',
-                    style: const TextStyle(color: Color(0xFF00F5D4), fontSize: 11, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: Color(0xFF6366F1), fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -111,8 +111,8 @@ class MonadWalletPill extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () => _openAddressExplorer(monad),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF00F5D4),
-                  side: const BorderSide(color: Color(0xFF00F5D4)),
+                  foregroundColor: const Color(0xFF6366F1),
+                  side: const BorderSide(color: Color(0xFF6366F1)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.open_in_new, size: 16),
@@ -152,13 +152,13 @@ class MonadWalletPill extends StatelessWidget {
                 'Copied',
                 'Wallet address copied to clipboard',
                 duration: const Duration(seconds: 2),
-                backgroundColor: const Color(0xFF8338EC),
+                backgroundColor: const Color(0xFF6366F1),
                 colorText: Colors.white,
               );
             },
             child: const Padding(
               padding: EdgeInsets.all(4),
-              child: Icon(Icons.copy, color: Color(0xFF00F5D4), size: 15),
+              child: Icon(Icons.copy, color: Color(0xFF6366F1), size: 15),
             ),
           ),
       ],

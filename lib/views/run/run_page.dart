@@ -92,9 +92,9 @@ class _RunPageState extends State<RunPageAutoStart> {
         }
       },
       child: Scaffold(
-      backgroundColor: const Color(0xFF1E1E1E), // Dark theme for run page
+      backgroundColor: const Color(0xFF202024), // Dark theme for run page
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF202024),
         elevation: 0,
         title: const Text(
           'Territory Run',
@@ -156,12 +156,12 @@ class _RunPageState extends State<RunPageAutoStart> {
           color: const Color(0xFF161228).withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF8338EC),
+            color: const Color(0xFF6366F1),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF8338EC).withValues(alpha: 0.4),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.4),
               blurRadius: 16,
               spreadRadius: 1,
             ),
@@ -176,7 +176,7 @@ class _RunPageState extends State<RunPageAutoStart> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 16),
+                    const Icon(Icons.bolt, color: Color(0xFF6366F1), size: 16),
                     const SizedBox(width: 6),
                     Text(
                       'SIMULATING: ${preset.title}',
@@ -223,7 +223,7 @@ class _RunPageState extends State<RunPageAutoStart> {
               child: LinearProgressIndicator(
                 value: simService.progress.value,
                 backgroundColor: Colors.white12,
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00F5D4)),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
                 minHeight: 5,
               ),
             ),
@@ -234,7 +234,7 @@ class _RunPageState extends State<RunPageAutoStart> {
                 Text(
                   simService.currentPhase.value,
                   style: const TextStyle(
-                    color: Color(0xFF00F5D4),
+                    color: Color(0xFF6366F1),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),

@@ -137,7 +137,7 @@ class _UserStatsPageState extends State<UserStatsPage> {
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2D2D2D),
+        color: const Color(0xFF202024),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.grey[700]!, width: 0.5),
         boxShadow: [
@@ -191,7 +191,7 @@ class _UserStatsPageState extends State<UserStatsPage> {
   // Widget _buildCompactStatCard(String title, String value, IconData icon, Color color) {
   //   return Container(
   //     decoration: BoxDecoration(
-  //       color: const Color(0xFF2D2D2D),
+  //       color: const Color(0xFF202024),
   //       borderRadius: BorderRadius.circular(6),
   //       border: Border.all(color: Colors.grey[700]!, width: 0.5),
   //     ),
@@ -239,13 +239,13 @@ class _UserStatsPageState extends State<UserStatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: const Color(0xFF202024),
       appBar: AppBar(
         title: const Text(
           'User Statistics',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: const Color(0xFF202024),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -450,7 +450,7 @@ class _UserStatsPageState extends State<UserStatsPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2D2D2D),
+                              color: const Color(0xFF202024),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: Colors.grey[700]!, width: 0.5),
                             ),

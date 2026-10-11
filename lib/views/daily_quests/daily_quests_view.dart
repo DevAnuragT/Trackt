@@ -19,10 +19,10 @@ class DailyQuestsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF141124),
+      backgroundColor: const Color(0xFF0F0F11),
       appBar: AppBar(
         title: const Text('Daily Quests'),
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -45,7 +45,7 @@ class DailyQuestsView extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: completed
                             ? [Colors.green[600]!, Colors.green[400]!]
-                            : [const Color(0xFF8338EC), const Color(0xFF3A86FF)],
+                            : [const Color(0xFF6366F1), const Color(0xFF6366F1)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -151,15 +151,15 @@ class DailyQuestsView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1C1733),
+                color: const Color(0xFF17171A),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF8338EC).withValues(alpha: 0.35)),
+                border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.35)),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.info_outline,
-                    color: Color(0xFF00F5D4),
+                    color: Color(0xFF6366F1),
                     size: 24,
                   ),
                   const SizedBox(width: 12),

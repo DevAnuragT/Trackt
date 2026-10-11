@@ -33,7 +33,7 @@ class RunControlsWidget extends StatelessWidget {
   Widget _buildStartButton(RunTrackerController controller) {
     return Obx(() => CountdownStartButton(
       onPressed: controller.isStartingRun.value ? null : () => controller.startRun(),
-      backgroundColor: const Color(0xFF2D2D2D),
+      backgroundColor: const Color(0xFF202024),
       buttonColor: Colors.green,
       textColor: Colors.white,
       isLoading: controller.isStartingRun.value,

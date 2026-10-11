@@ -46,12 +46,12 @@ class MapControlsWidget extends StatelessWidget {
       mini: true,
       heroTag: tag,
       elevation: 0,
-      backgroundColor: const Color(0xFF181528).withValues(alpha: 0.92),
-      foregroundColor: accent ? const Color(0xFF00F5D4) : Colors.white,
+      backgroundColor: const Color(0xFF17171A).withValues(alpha: 0.92),
+      foregroundColor: accent ? const Color(0xFF6366F1) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: (accent ? const Color(0xFF00F5D4) : Colors.white)
+          color: (accent ? const Color(0xFF6366F1) : Colors.white)
               .withValues(alpha: 0.25),
         ),
       ),

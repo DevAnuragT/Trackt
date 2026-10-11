@@ -1247,7 +1247,7 @@ class RunTrackerController extends GetxController {
           '🎯 Territory Conquered!',
           'Simulated ${area.toStringAsFixed(0)} m² claimed! Loop validated on Mapbox.',
           duration: const Duration(seconds: 4),
-          backgroundColor: const Color(0xFF8338EC),
+          backgroundColor: const Color(0xFF6366F1),
           colorText: Colors.white,
         );
         return;

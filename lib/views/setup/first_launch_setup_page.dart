@@ -71,7 +71,7 @@ class _FirstLaunchSetupPageState extends State<FirstLaunchSetupPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: const Color(0xFF202024),
         title: const Text(
           'Choose your color',
           style: TextStyle(color: Colors.white),
@@ -185,7 +185,7 @@ class _FirstLaunchSetupPageState extends State<FirstLaunchSetupPage> {
     builder: (context) => StatefulBuilder(
       builder: (context, setDialogState) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: const Color(0xFF202024),
           title: const Text(
             'Pick custom color',
             style: TextStyle(color: Colors.white),
@@ -421,7 +421,7 @@ class _FirstLaunchSetupPageState extends State<FirstLaunchSetupPage> {
               const SizedBox(height: 20),
               // Color selection card
               Card(
-                color: const Color(0xFF1E1E1E),
+                color: const Color(0xFF202024),
                 elevation: 8,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),

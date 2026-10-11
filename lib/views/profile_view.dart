@@ -186,7 +186,7 @@ class _ProfileViewState extends State<ProfileView> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF141124),
+          backgroundColor: const Color(0xFF0F0F11),
           title: const Text(
             'Pick a custom color',
             style: TextStyle(color: Colors.white),
@@ -218,7 +218,7 @@ class _ProfileViewState extends State<ProfileView> {
                 _changeUserColor(tempColor);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8338EC),
+                backgroundColor: const Color(0xFF6366F1),
               ),
               child: const Text(
                 'Apply',
@@ -245,7 +245,7 @@ class _ProfileViewState extends State<ProfileView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         title: const Text(
           'Change Territory Color',
           style: TextStyle(color: Colors.white, fontSize: 18),
@@ -272,7 +272,7 @@ class _ProfileViewState extends State<ProfileView> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8338EC),
+              backgroundColor: const Color(0xFF6366F1),
             ),
             child: const Text(
               'Change Color',
@@ -363,10 +363,10 @@ class _ProfileViewState extends State<ProfileView> {
     // Show loading while initializing
     if (!_isInitialized || _prefs == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         appBar: AppBar(
           title: const Text('Profile'),
-          backgroundColor: const Color(0xFF141124),
+          backgroundColor: const Color(0xFF0F0F11),
           foregroundColor: Colors.white,
         ),
         body: const Center(
@@ -376,10 +376,10 @@ class _ProfileViewState extends State<ProfileView> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF141124),
+      backgroundColor: const Color(0xFF0F0F11),
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -539,7 +539,7 @@ class _ProfileViewState extends State<ProfileView> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: const Color(0xFF8338EC)),
+                        borderSide: const BorderSide(color: const Color(0xFF6366F1)),
                       ),
                     ),
                   ),
@@ -679,7 +679,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       children: [
         _ActionTile(
-          color: const Color(0xFF8338EC),
+          color: const Color(0xFF6366F1),
           icon: Icons.history,
           title: 'Territory History',
           onTap: () {

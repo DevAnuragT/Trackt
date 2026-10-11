@@ -13,11 +13,11 @@ class TerritoryHistoryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Territory History'),
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         foregroundColor: Colors.white,
         // Removed delete button - territories are stored in cloud and cannot be deleted locally
       ),
-      backgroundColor: const Color(0xFF141124),
+      backgroundColor: const Color(0xFF0F0F11),
       body: Obx(() {
         final allTerritories = territoryHistoryService.getAllTerritories();
         

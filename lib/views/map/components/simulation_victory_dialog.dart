@@ -23,15 +23,15 @@ class SimulationVictoryDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF181528),
+          color: const Color(0xFF17171A),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF8338EC).withValues(alpha: 0.6),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.6),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF8338EC).withValues(alpha: 0.35),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.35),
               blurRadius: 30,
               spreadRadius: 2,
             ),
@@ -50,22 +50,22 @@ class SimulationVictoryDialog extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8338EC).withValues(alpha: 0.25),
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFF8338EC).withValues(alpha: 0.8),
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.8),
                           width: 1,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 14),
+                          const Icon(Icons.bolt, color: Color(0xFF6366F1), size: 14),
                           const SizedBox(width: 4),
                           Text(
                             isSimulation ? 'MONAD METROPOLIS DEMO' : 'MONAD TESTNET',
                             style: const TextStyle(
-                              color: Color(0xFF00F5D4),
+                              color: Color(0xFF6366F1),
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.8,
@@ -91,13 +91,13 @@ class SimulationVictoryDialog extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF8338EC), Color(0xFF3A86FF)],
+                      colors: [Color(0xFF6366F1), Color(0xFF6366F1)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF8338EC).withValues(alpha: 0.5),
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.5),
                         blurRadius: 18,
                       ),
                     ],
@@ -141,7 +141,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Area Claimed',
                         value: '${result.areaM2.toStringAsFixed(0)} m²',
                         icon: Icons.crop_free,
-                        color: const Color(0xFF00F5D4),
+                        color: const Color(0xFF6366F1),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -150,7 +150,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Loop Distance',
                         value: '${result.distanceMeters.toStringAsFixed(0)} m',
                         icon: Icons.directions_run,
-                        color: const Color(0xFFFFBE0B),
+                        color: const Color(0xFFA1A1AA),
                       ),
                     ),
                   ],
@@ -163,7 +163,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Pacing Duration',
                         value: _formatDuration(result.duration),
                         icon: Icons.timer_outlined,
-                        color: const Color(0xFF3A86FF),
+                        color: const Color(0xFF6366F1),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -172,7 +172,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Tokens Earned',
                         value: '+${result.coinsEarned} \$TRACKT',
                         icon: Icons.monetization_on,
-                        color: const Color(0xFFFF006E),
+                        color: const Color(0xFF6366F1),
                       ),
                     ),
                   ],
@@ -183,10 +183,10 @@ class SimulationVictoryDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF100C1F),
+                    color: const Color(0xFF17171A),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: const Color(0xFF8338EC).withValues(alpha: 0.4),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
@@ -202,7 +202,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                                 width: 8,
                                 height: 8,
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFF00F5D4),
+                                  color: Color(0xFF6366F1),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -220,13 +220,13 @@ class SimulationVictoryDialog extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00F5D4).withValues(alpha: 0.15),
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: const Text(
                               '10,000 TPS',
                               style: TextStyle(
-                                color: Color(0xFF00F5D4),
+                                color: Color(0xFF6366F1),
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -255,13 +255,13 @@ class SimulationVictoryDialog extends StatelessWidget {
                                 'Copied to Clipboard',
                                 'Monad transaction hash copied!',
                                 duration: const Duration(seconds: 2),
-                                backgroundColor: const Color(0xFF8338EC),
+                                backgroundColor: const Color(0xFF6366F1),
                                 colorText: Colors.white,
                               );
                             },
                             child: const Padding(
                               padding: EdgeInsets.all(4),
-                              child: Icon(Icons.copy, color: Color(0xFF00F5D4), size: 14),
+                              child: Icon(Icons.copy, color: Color(0xFF6366F1), size: 14),
                             ),
                           ),
                         ],
@@ -284,8 +284,8 @@ class SimulationVictoryDialog extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: () => _openExplorer(result.explorerUrl!),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF00F5D4),
-                              side: const BorderSide(color: Color(0xFF00F5D4), width: 1),
+                              foregroundColor: const Color(0xFF6366F1),
+                              side: const BorderSide(color: Color(0xFF6366F1), width: 1),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -313,7 +313,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                       Get.offAllNamed('/home'); // Return to main map view
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8338EC),
+                      backgroundColor: const Color(0xFF6366F1),
                       foregroundColor: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -366,7 +366,7 @@ class SimulationVictoryDialog extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF221C38),
+        color: const Color(0xFF202024),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withValues(alpha: 0.25),
@@ -417,7 +417,7 @@ class SimulationVictoryDialog extends StatelessWidget {
           'Explorer link copied',
           'Could not open browser; link copied to clipboard.',
           duration: const Duration(seconds: 2),
-          backgroundColor: const Color(0xFF8338EC),
+          backgroundColor: const Color(0xFF6366F1),
           colorText: Colors.white,
         );
       }

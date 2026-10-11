@@ -25,15 +25,15 @@ class _SimulationSheetState extends State<SimulationSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141124),
+        color: const Color(0xFF0F0F11),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFF8338EC).withValues(alpha: 0.5),
+          color: const Color(0xFF6366F1).withValues(alpha: 0.5),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8338EC).withValues(alpha: 0.25),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.25),
             blurRadius: 25,
             offset: const Offset(0, -4),
           ),
@@ -70,16 +70,16 @@ class _SimulationSheetState extends State<SimulationSheet> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF8338EC).withValues(alpha: 0.2),
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF8338EC),
+                            color: const Color(0xFF6366F1),
                             width: 1,
                           ),
                         ),
                         child: const Icon(
                           Icons.science,
-                          color: Color(0xFF00F5D4),
+                          color: Color(0xFF6366F1),
                           size: 20,
                         ),
                       ),
@@ -109,17 +109,17 @@ class _SimulationSheetState extends State<SimulationSheet> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00F5D4).withValues(alpha: 0.15),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: const Color(0xFF00F5D4).withValues(alpha: 0.5),
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.5),
                         width: 1,
                       ),
                     ),
                     child: const Text(
                       'MONAD TESTNET',
                       style: TextStyle(
-                        color: Color(0xFF00F5D4),
+                        color: Color(0xFF6366F1),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.6,
@@ -134,7 +134,7 @@ class _SimulationSheetState extends State<SimulationSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E1936),
+                  color: const Color(0xFF202024),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: Colors.white12,
@@ -144,7 +144,7 @@ class _SimulationSheetState extends State<SimulationSheet> {
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: Color(0xFF3A86FF), size: 16),
+                    Icon(Icons.info_outline, color: Color(0xFF6366F1), size: 16),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -186,12 +186,12 @@ class _SimulationSheetState extends State<SimulationSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF8338EC).withValues(alpha: 0.22)
-                            : const Color(0xFF1C1830),
+                            ? const Color(0xFF6366F1).withValues(alpha: 0.22)
+                            : const Color(0xFF202024),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF8338EC)
+                              ? const Color(0xFF6366F1)
                               : Colors.white10,
                           width: isSelected ? 1.5 : 1,
                         ),
@@ -202,8 +202,8 @@ class _SimulationSheetState extends State<SimulationSheet> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? const Color(0xFF8338EC)
-                                  : const Color(0xFF282342),
+                                  ? const Color(0xFF6366F1)
+                                  : const Color(0xFF202024),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
@@ -253,7 +253,7 @@ class _SimulationSheetState extends State<SimulationSheet> {
                           if (isSelected)
                             const Icon(
                               Icons.check_circle,
-                              color: Color(0xFF00F5D4),
+                              color: Color(0xFF6366F1),
                               size: 18,
                             ),
                         ],
@@ -318,10 +318,10 @@ class _SimulationSheetState extends State<SimulationSheet> {
                     await simService.launchSimulation(context: context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8338EC),
+                    backgroundColor: const Color(0xFF6366F1),
                     foregroundColor: Colors.white,
                     elevation: 6,
-                    shadowColor: const Color(0xFF8338EC).withValues(alpha: 0.6),
+                    shadowColor: const Color(0xFF6366F1).withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -367,11 +367,11 @@ class _SimulationSheetState extends State<SimulationSheet> {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF8338EC).withValues(alpha: 0.3)
-              : const Color(0xFF1E1936),
+              ? const Color(0xFF6366F1).withValues(alpha: 0.3)
+              : const Color(0xFF202024),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF8338EC) : Colors.white10,
+            color: isSelected ? const Color(0xFF6366F1) : Colors.white10,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -389,7 +389,7 @@ class _SimulationSheetState extends State<SimulationSheet> {
             Text(
               subtitle,
               style: TextStyle(
-                color: isSelected ? const Color(0xFF00F5D4) : Colors.white38,
+                color: isSelected ? const Color(0xFF6366F1) : Colors.white38,
                 fontSize: 10,
               ),
             ),

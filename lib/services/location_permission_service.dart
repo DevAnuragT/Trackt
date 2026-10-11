@@ -219,7 +219,7 @@ class LocationPermissionService extends GetxService {
   Future<void> _showLocationServiceRequiredDialog() async {
     return Get.dialog(
       AlertDialog(
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: const Color(0xFF202024),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -269,7 +269,7 @@ class LocationPermissionService extends GetxService {
   Future<void> _showPermissionDeniedDialog() async {
     return Get.dialog(
       AlertDialog(
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: const Color(0xFF202024),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -319,7 +319,7 @@ class LocationPermissionService extends GetxService {
   Future<void> _showPermissionDeniedForeverDialog() async {
     return Get.dialog(
       AlertDialog(
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: const Color(0xFF202024),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -369,7 +369,7 @@ class LocationPermissionService extends GetxService {
   Future<bool> _showAllowAllTimeDialog() async {
     bool? result = await Get.dialog<bool>(
       AlertDialog(
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: const Color(0xFF202024),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -471,7 +471,7 @@ class LocationPermissionService extends GetxService {
   void _showManualSettingsInstructions() {
     Get.dialog(
       AlertDialog(
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: const Color(0xFF202024),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

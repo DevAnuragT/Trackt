@@ -96,10 +96,10 @@ class _ClubPageViewState extends State<ClubPageView> {
   Widget build(BuildContext context) {
     if (_clubData == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         appBar: AppBar(
           title: const Text('Loading...'),
-          backgroundColor: const Color(0xFF141124),
+          backgroundColor: const Color(0xFF0F0F11),
           foregroundColor: Colors.white,
           elevation: 0,
         ),
@@ -110,10 +110,10 @@ class _ClubPageViewState extends State<ClubPageView> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF141124),
+      backgroundColor: const Color(0xFF0F0F11),
       appBar: AppBar(
         title: Text(_clubData!.clubName),
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -125,7 +125,7 @@ class _ClubPageViewState extends State<ClubPageView> {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      backgroundColor: const Color(0xFF141124),
+                      backgroundColor: const Color(0xFF0F0F11),
                       title: const Text('Leave Club', style: TextStyle(color: Colors.white)),
                       content: Text(
                         _clubService.isCurrentUserFounder(_clubData!)

@@ -104,15 +104,15 @@ class _MapViewState extends State<MapView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: const Color(0xFF161224).withValues(alpha: 0.94),
+          color: const Color(0xFF17171A).withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFF8338EC).withValues(alpha: 0.85),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.85),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF8338EC).withValues(alpha: 0.35),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.35),
               blurRadius: 14,
               spreadRadius: 1,
             ),
@@ -121,7 +121,7 @@ class _MapViewState extends State<MapView> {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.bolt, color: Color(0xFF00F5D4), size: 18),
+            Icon(Icons.bolt, color: Color(0xFF6366F1), size: 18),
             SizedBox(width: 6),
             Text(
               'Judge Demo Lab',

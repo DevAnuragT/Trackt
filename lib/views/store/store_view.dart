@@ -13,10 +13,10 @@ class StoreView extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasShop = Get.isRegistered<PowerUpService>();
     return Scaffold(
-      backgroundColor: const Color(0xFF141124),
+      backgroundColor: const Color(0xFF0F0F11),
       appBar: AppBar(
         title: const Text('Power-Up Shop'),
-        backgroundColor: const Color(0xFF141124),
+        backgroundColor: const Color(0xFF0F0F11),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [if (hasShop) _balanceChip()],
@@ -37,13 +37,13 @@ class StoreView extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF8338EC).withValues(alpha: 0.2),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF8338EC).withValues(alpha: 0.7)),
+            border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.7)),
           ),
           child: Row(
             children: [
-              const Icon(Icons.monetization_on, color: Color(0xFFFFBE0B), size: 16),
+              const Icon(Icons.monetization_on, color: Color(0xFFA1A1AA), size: 16),
               const SizedBox(width: 6),
               Obx(() => Text(
                     '${prefs.userCoins.value} \$TRACKT',
@@ -100,12 +100,12 @@ class _PowerUpCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1733),
+          color: const Color(0xFF17171A),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: active
-                ? const Color(0xFF00F5D4).withValues(alpha: 0.7)
-                : const Color(0xFF8338EC).withValues(alpha: 0.35),
+                ? const Color(0xFF6366F1).withValues(alpha: 0.7)
+                : const Color(0xFF6366F1).withValues(alpha: 0.35),
             width: 1.3,
           ),
         ),
@@ -140,7 +140,7 @@ class _PowerUpCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00F5D4).withValues(alpha: 0.15),
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -148,7 +148,7 @@ class _PowerUpCard extends StatelessWidget {
                           ? 'OWNED'
                           : (remaining != null ? _fmt(remaining) + ' left' : 'ACTIVE'),
                       style: const TextStyle(
-                        color: Color(0xFF00F5D4),
+                        color: Color(0xFF6366F1),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -168,8 +168,8 @@ class _PowerUpCard extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: (permanent && active) ? null : () => _buy(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8338EC),
-                  disabledBackgroundColor: const Color(0xFF2A2440),
+                  backgroundColor: const Color(0xFF6366F1),
+                  disabledBackgroundColor: const Color(0xFF202024),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -196,7 +196,7 @@ class _PowerUpCard extends StatelessWidget {
           item.duration == null
               ? 'Permanent unlock applied.'
               : 'Active for ${_fmt(item.duration!)}.',
-          backgroundColor: const Color(0xFF8338EC),
+          backgroundColor: const Color(0xFF6366F1),
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
         );
@@ -212,7 +212,7 @@ class _PowerUpCard extends StatelessWidget {
         break;
       case PurchaseResult.alreadyActive:
         Get.snackbar('Already owned', 'You already own ${item.title}.',
-            backgroundColor: const Color(0xFF2A2440), colorText: Colors.white);
+            backgroundColor: const Color(0xFF202024), colorText: Colors.white);
         break;
       case PurchaseResult.error:
         Get.snackbar('Purchase failed', 'Please try again.',

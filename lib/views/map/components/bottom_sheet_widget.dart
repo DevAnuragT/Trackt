@@ -105,7 +105,7 @@ class TerritoryBottomSheet extends StatelessWidget {
           builder: (context, scrollController) {
             return Container(
               decoration: const BoxDecoration(
-                color: Color(0xFF181528), // Dark background
+                color: Color(0xFF17171A), // Dark background
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -187,7 +187,7 @@ class TerritoryBottomSheet extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1733), // Dark card background
+            color: const Color(0xFF17171A), // Dark card background
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[700]!, width: 0.5), // Subtle border
           ),
@@ -213,7 +213,7 @@ class TerritoryBottomSheet extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1733),
+            color: const Color(0xFF17171A),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[700]!, width: 0.5),
           ),
@@ -248,7 +248,7 @@ class TerritoryBottomSheet extends StatelessWidget {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF00F5D4), // Monad cyan accent
+            color: const Color(0xFF6366F1), // Monad cyan accent
           ),
         ),
         if (unit.isNotEmpty) ...[
@@ -293,9 +293,9 @@ class TerritoryBottomSheet extends StatelessWidget {
                   _showRunPage(autoStart: true);
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8338EC),
+            backgroundColor: const Color(0xFF6366F1),
             foregroundColor: Colors.white,
-            disabledBackgroundColor: const Color(0xFF2A2440),
+            disabledBackgroundColor: const Color(0xFF202024),
             disabledForegroundColor: Colors.white38,
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -332,7 +332,7 @@ class TerritoryBottomSheet extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () => _showRunPage(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8338EC),
+            backgroundColor: const Color(0xFF6366F1),
             foregroundColor: Colors.white,
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -408,7 +408,7 @@ class TerritoryBottomSheet extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey[600]!, width: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                color: const Color(0xFF1C1733),
+                color: const Color(0xFF17171A),
               ),
               child: const Center(
                 child: Text(
@@ -436,7 +436,7 @@ class TerritoryBottomSheet extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey[600]!, width: 0.5),
                       borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFF1C1733),
+                      color: const Color(0xFF17171A),
                     ),
                     child: Row(
                       children: [
@@ -667,7 +667,7 @@ class TerritoryBottomSheet extends StatelessWidget {
   //   return Container(
   //     padding: const EdgeInsets.all(16),
   //     decoration: BoxDecoration(
-  //       color: const Color(0xFF1C1733), // Dark card background
+  //       color: const Color(0xFF17171A), // Dark card background
   //       borderRadius: BorderRadius.circular(12),
   //       border: Border.all(color: Colors.grey[700]!, width: 0.5), // Subtle border
   //     ),
