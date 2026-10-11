@@ -363,10 +363,10 @@ class _ProfileViewState extends State<ProfileView> {
     // Show loading while initializing
     if (!_isInitialized || _prefs == null) {
       return Scaffold(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: const Color(0xFF141124),
         appBar: AppBar(
           title: const Text('Profile'),
-          backgroundColor: Colors.grey[850],
+          backgroundColor: const Color(0xFF141124),
           foregroundColor: Colors.white,
         ),
         body: const Center(
@@ -374,12 +374,12 @@ class _ProfileViewState extends State<ProfileView> {
         ),
       );
     }
-    
+
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: const Color(0xFF141124),
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: Colors.grey[900],
+        backgroundColor: const Color(0xFF141124),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
