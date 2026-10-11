@@ -31,29 +31,36 @@ class AuthController extends GetxController {
   }
   
   void _initAuthListener() {
-    // Listen to auth state changes
-    _user.value = Supabase.instance.client.auth.currentUser;
-    print('🔍 Auth listener initialized, current user: ${_user.value?.id ?? 'None'}');
-    
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
-      print('🔄 Auth state change detected: ${data.event}');
-      print('🔄 Session user: ${data.session?.user.id ?? 'None'}');
-      
-      _user.value = data.session?.user;
-      
-      // If user signed in, refresh their profile from Supabase
-      if (data.session?.user != null) {
-        try {
-          if (Get.isRegistered<UserPreferencesService>()) {
-            final prefsService = Get.find<UserPreferencesService>();
-            await prefsService.refreshProfileFromSupabase();
-            print('✅ User profile refreshed from Supabase after auth state change');
+    // Guard against Supabase not being initialized (e.g. no SUPABASE_URL/KEY
+    // configured). The app must still boot offline — judges can use Judge Demo
+    // Mode without an account.
+    try {
+      // Listen to auth state changes
+      _user.value = Supabase.instance.client.auth.currentUser;
+      print('🔍 Auth listener initialized, current user: ${_user.value?.id ?? 'None'}');
+
+      Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+        print('🔄 Auth state change detected: ${data.event}');
+        print('🔄 Session user: ${data.session?.user.id ?? 'None'}');
+
+        _user.value = data.session?.user;
+
+        // If user signed in, refresh their profile from Supabase
+        if (data.session?.user != null) {
+          try {
+            if (Get.isRegistered<UserPreferencesService>()) {
+              final prefsService = Get.find<UserPreferencesService>();
+              await prefsService.refreshProfileFromSupabase();
+              print('✅ User profile refreshed from Supabase after auth state change');
+            }
+          } catch (e) {
+            print('⚠️ Failed to refresh profile after auth state change: $e');
           }
-        } catch (e) {
-          print('⚠️ Failed to refresh profile after auth state change: $e');
         }
-      }
-    });
+      });
+    } catch (e) {
+      print('⚠️ Supabase not initialized; auth disabled (offline mode): $e');
+    }
   }
   
   // Check if user needs setup and navigate accordingly
