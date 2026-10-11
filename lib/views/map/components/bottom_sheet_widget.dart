@@ -279,9 +279,9 @@ class TerritoryBottomSheet extends StatelessWidget {
       
       return Obx(() => SizedBox(
         width: double.infinity,
-        height: 50,
+        height: 54,
         child: ElevatedButton(
-          onPressed: runTracker.isRunning.value 
+          onPressed: runTracker.isRunning.value
               ? null  // Disable if already running
               : () async {
                   // Show "Allow all the time" dialog (first time) then open settings
@@ -293,22 +293,34 @@ class TerritoryBottomSheet extends StatelessWidget {
                   _showRunPage(autoStart: true);
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: runTracker.isRunning.value 
-                ? Colors.grey 
-                : Colors.blue,
+            backgroundColor: const Color(0xFF8338EC),
             foregroundColor: Colors.white,
+            disabledBackgroundColor: const Color(0xFF2A2440),
+            disabledForegroundColor: Colors.white38,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: Text(
-            runTracker.isRunning.value 
-                ? 'Run in Progress...' 
-                : 'Start Run',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                runTracker.isRunning.value ? Icons.directions_run : Icons.play_arrow_rounded,
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                runTracker.isRunning.value
+                    ? 'Run in Progress…'
+                    : 'Start Run',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
         ),
       ));
@@ -316,14 +328,15 @@ class TerritoryBottomSheet extends StatelessWidget {
       // Fallback if controller not found
       return SizedBox(
         width: double.infinity,
-        height: 50,
+        height: 54,
         child: ElevatedButton(
           onPressed: () => _showRunPage(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: const Color(0xFF8338EC),
             foregroundColor: Colors.white,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
           child: const Text(
