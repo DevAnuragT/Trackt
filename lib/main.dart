@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'services/env_config.dart';
 import 'routes/app_routes.dart';
 import 'controllers/auth/auth_controller.dart';
@@ -30,7 +30,7 @@ Future<void> main() async {
   // Initialize Mapbox with access token
   try {
     if (MapboxConfig.isConfigured) {
-      MapboxOptions.setAccessToken(MapboxConfig.accessToken);
+      mapbox.MapboxOptions.setAccessToken(MapboxConfig.accessToken);
       print('Mapbox initialized successfully in main()');
     } else {
       print('Warning: Mapbox access token not configured');
@@ -138,12 +138,98 @@ class MyApp extends StatelessWidget {
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: false,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.2,
+      ),
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: Color(0xFF00F5D4),
     ),
     snackBarTheme: const SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
+    ),
+    // Modern, compact, consistent controls across every screen.
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF8338EC),
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: const Color(0xFF2A2440),
+        disabledForegroundColor: Colors.white38,
+        elevation: 0,
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.2),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: const Color(0xFF8338EC),
+        foregroundColor: Colors.white,
+        minimumSize: const Size(0, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.2),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF00F5D4),
+        minimumSize: const Size(0, 48),
+        side: const BorderSide(color: Color(0xFF00F5D4), width: 1.3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.2),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: const Color(0xFF00F5D4),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF1C1733),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      hintStyle: const TextStyle(color: Colors.white38),
+      labelStyle: const TextStyle(color: Colors.white60),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFF8338EC), width: 1.5),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: const Color(0xFF1C1733),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: const Color(0xFF1C1733),
+      selectedColor: const Color(0xFF8338EC),
+      labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      side: BorderSide.none,
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Color(0xFF181528),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: const Color(0xFF181528),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
     ),
   );
 }
