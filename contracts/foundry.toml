@@ -6,8 +6,9 @@ test = "test"
 solc_version = "0.8.24"
 optimizer = true
 optimizer_runs = 200
-# Monad Testnet
-eth_rpc_url = "https://testnet-rpc.monad.xyz"
+
+# Monad Testnet RPC is passed explicitly to deploy commands via --rpc-url
+# (kept out of the default profile so `forge test` stays local/offline).
 
 [fmt]
 line_length = 100
