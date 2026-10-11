@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 import '../models/territory/territory_model.dart';
 import '../services/database_service.dart';
 import '../services/location_service.dart';
+import '../services/power_up_service.dart';
 import '../services/seed_territory_service.dart';
 import '../views/map/components/bottom_sheet_widget.dart';
 // import 'dart:math' as math;
@@ -353,6 +354,49 @@ class TerritoryService extends GetxService {
   Future<bool> wouldConquerTerritories(List<Map<String, dynamic>> runBoundaryPoints) async { return false; }
   Future<List<Map<String, dynamic>>> getConquestPreview(List<Map<String, dynamic>> runBoundaryPoints) async { return []; }
   Future<List<Map<String, dynamic>>> executeTerritoryConquest(List<Map<String, dynamic>> runBoundaryPoints, String newOwnerId) async { return []; }
+
+  // ==================== TERRITORY SHIELD (POWER-UP) ====================
+
+  /// True while the current user's Territory Shield power-up is active.
+  bool get shieldActive {
+    try {
+      return Get.isRegistered<PowerUpService>() &&
+          Get.find<PowerUpService>().isActive('shield');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// The current user's own territories that are currently shield-protected.
+  List<Territory> get shieldedTerritories {
+    if (!shieldActive) return const [];
+    final me = currentUserId;
+    if (me == null) return const [];
+    return nearbyTerritories.where((t) => t.ownerId == me).toList();
+  }
+
+  /// Remove territories that may not be conquered from a candidate list. A
+  /// territory owned by the current user is protected while their Territory
+  /// Shield is active. Any conquest resolution (client- or server-side) must
+  /// pass its targets through here so shielded land cannot be clipped/stolen.
+  List<Territory> applyShieldProtection(List<Territory> conquestTargets) {
+    return filterShielded(
+      conquestTargets,
+      ownerId: currentUserId,
+      shieldActive: shieldActive,
+    );
+  }
+
+  /// Pure, testable shield filter: drops targets owned by [ownerId] when
+  /// [shieldActive] is true; otherwise returns the list unchanged.
+  static List<Territory> filterShielded(
+    List<Territory> targets, {
+    required String? ownerId,
+    required bool shieldActive,
+  }) {
+    if (!shieldActive || ownerId == null) return targets;
+    return targets.where((t) => t.ownerId != ownerId).toList();
+  }
 
   /// Refresh territory data from database after conquests
   Future<void> refreshTerritoryData() async {
