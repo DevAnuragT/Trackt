@@ -133,44 +133,31 @@ class AuthController extends GetxController {
   Future<void> signUpWithEmail(String email, String password) async {
     try {
       _isLoading.value = true;
-      
-      // Check if user already exists and what type of account
-      final accountInfo = await _authService.checkUserAccountType(email);
-      
-      if (accountInfo['exists'] == true) {
-        if (accountInfo['type'] == 'oauth') {
-          // User exists with OAuth account (Google, etc.)
-      Get.snackbar(
-        'Account Already Exists - OAuth Sign-in Required',
-        'This email is already registered with Google. Please use "Sign in with Google" instead.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
-      );
-          return;
-        } else {
-          // User exists with password account
-          Get.snackbar(
-            'Account Already Exists',
-            'An account with this email already exists. Please sign in instead.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
-            duration: const Duration(seconds: 3),
-          );
-          
-          // Redirect to sign in page
-          Future.delayed(const Duration(seconds: 2), () {
-            Get.offAllNamed('/signin', arguments: {'email': email});
-          });
-          return;
-        }
+
+      // Attempt signup directly. The previous pre-check used the admin API
+      // (needs the service_role key, unavailable with the anon key) and a
+      // dummy-password probe that misread Supabase's generic "Invalid login
+      // credentials" as "user exists" — which blocked ALL new signups.
+      final response = await _authService.signUpWithEmail(email, password);
+
+      // Supabase obfuscates existing emails: signing up an already-registered
+      // (confirmed) email returns a user with an empty identities list.
+      final identities = response.user?.identities;
+      if (identities != null && identities.isEmpty) {
+        Get.snackbar(
+          'Account Already Exists',
+          'An account with this email already exists. Please sign in instead.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        Future.delayed(const Duration(seconds: 2), () {
+          Get.offAllNamed('/signin', arguments: {'email': email});
+        });
+        return;
       }
-      
-      // Proceed with signup since user doesn't exist
-      await _authService.signUpWithEmail(email, password);
-      
+
       Get.snackbar(
         'Success',
         'Account created! Please check your email for verification code.',
@@ -178,7 +165,7 @@ class AuthController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-      
+
       Get.offAllNamed('/otp-verification', arguments: {'email': email});
     } catch (e) {
       Get.snackbar(
