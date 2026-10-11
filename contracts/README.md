@@ -1,6 +1,6 @@
 # Trackt Smart Contracts
 
-Solidity contracts for Trackt's on-chain territory conquest, built and tested with [Foundry](https://getfoundry.sh), targeting **Monad Testnet** (Chain ID `143`).
+Solidity contracts for Trackt's on-chain territory conquest, built and tested with [Foundry](https://getfoundry.sh), targeting **Monad Testnet** (Chain ID `10143`).
 
 ## Contracts
 

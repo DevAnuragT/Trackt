@@ -59,7 +59,7 @@ Simulation bypasses auth and network so it works on a fresh install with no acco
                 ▼                        ▼
 ┌──────────────────────────────┐  ┌──────────────────────┐
 │     PostGIS Spatial Engine   │  │   Monad Testnet      │
-│  • ST_MakePolygon / Unions   │  │   (Chain ID: 143)    │
+│  • ST_MakePolygon / Unions   │  │   (Chain ID: 10143)    │
 │  • ST_Intersection / Diff    │  │  • TerritoryRegistry │
 │  • Fast Viewport Culling     │  │  • RunRewardToken    │
 └──────────────────────────────┘  └──────────────────────┘
@@ -67,7 +67,7 @@ Simulation bypasses auth and network so it works on a fresh install with no acco
 
 * **Frontend:** Flutter & Dart, GetX state management, Mapbox Maps SDK v2.0.
 * **Spatial Engine:** PostgreSQL + PostGIS (`ST_MakePolygon`, `ST_UnaryUnion`, `ST_Intersection`, `ST_Difference`).
-* **Blockchain:** Monad Testnet (`Chain ID: 143`) for territory ownership verification, steal audit trails, and tokenized run rewards.
+* **Blockchain:** Monad Testnet (`Chain ID: 10143`) for territory ownership verification, steal audit trails, and tokenized run rewards.
 * **Mobile Web3 client:** `web3dart` + an on-device burner wallet (`MonadService`). The private key is generated with `Random.secure()` and persisted in `SharedPreferences`; territory claims are signed locally and broadcast to the Monad RPC. Falls back to a local settlement proof until the contracts are deployed, so the demo never breaks.
 * **Smart contracts:** [`TerritoryRegistry.sol`](contracts/src/TerritoryRegistry.sol) (`claimTerritory` + conquest) and [`RunRewardToken.sol`](contracts/src/RunRewardToken.sol) (ERC-20 `$TRACKT`), built and tested with Foundry (32 passing tests). See [`contracts/`](contracts/README.md).
 * **Native Android:** Sticky Foreground Service (`GpsTrackingService.kt`) with wake-locks and Samsung One UI optimization.
@@ -108,7 +108,7 @@ The app ships with sensible defaults and runs with **no extra config** (it uses 
 
 ```env
 MONAD_RPC_URL=https://testnet-rpc.monad.xyz
-MONAD_CHAIN_ID=143
+MONAD_CHAIN_ID=10143
 MONAD_TERRITORY_CONTRACT=0x...   # TerritoryRegistry address
 MONAD_TOKEN_CONTRACT=0x...       # RunRewardToken ($TRACKT) address
 ```
@@ -117,7 +117,9 @@ Once `MONAD_TERRITORY_CONTRACT` is set, completed runs broadcast a real `claimTe
 
 To build, test, and deploy the contracts, see [`contracts/README.md`](contracts/README.md).
 
-> **Deployed contract addresses:** _TBD — add here with Monad Explorer links once deployment is verified._
+> **Deployed on Monad Testnet (Chain ID `10143`):**
+> - `TerritoryRegistry`: [`0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1`](https://testnet.monadexplorer.com/address/0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1)
+> - `RunRewardToken` ($TRACKT): [`0x3f660583F7D2Fbf2f2484b468BE3F7e3121Bf8B6`](https://testnet.monadexplorer.com/address/0x3f660583F7D2Fbf2f2484b468BE3F7e3121Bf8B6)
 
 ---
 

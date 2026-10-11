@@ -13,7 +13,7 @@ import 'env_config.dart';
 ///
 /// Generates and persists a local burner/session wallet so the runner gets a
 /// zero-friction, gasless-feeling experience: no MetaMask popups mid-run.
-/// Territory claims are dispatched silently to Monad Testnet (Chain ID 143)
+/// Territory claims are dispatched silently to Monad Testnet (Chain ID 10143)
 /// at sub-second finality.
 ///
 /// Resilient by design: if the RPC is unreachable or the teammate's contracts

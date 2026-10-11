@@ -208,7 +208,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               const Text(
-                                'Monad Testnet (Chain ID 143)',
+                                'Monad Testnet (Chain ID 10143)',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
