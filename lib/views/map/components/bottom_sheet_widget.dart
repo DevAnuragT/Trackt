@@ -105,7 +105,7 @@ class TerritoryBottomSheet extends StatelessWidget {
           builder: (context, scrollController) {
             return Container(
               decoration: const BoxDecoration(
-                color: Color(0xFF1E1E1E), // Dark background
+                color: Color(0xFF181528), // Dark background
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -128,7 +128,7 @@ class TerritoryBottomSheet extends StatelessWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[600], // Darker drag handle
+                        color: Colors.white24, // Drag handle
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -187,7 +187,7 @@ class TerritoryBottomSheet extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF2D2D2D), // Dark card background
+            color: const Color(0xFF1C1733), // Dark card background
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[700]!, width: 0.5), // Subtle border
           ),
@@ -213,7 +213,7 @@ class TerritoryBottomSheet extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF2D2D2D),
+            color: const Color(0xFF1C1733),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[700]!, width: 0.5),
           ),
@@ -248,7 +248,7 @@ class TerritoryBottomSheet extends StatelessWidget {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.blue, // Keep blue accent for values
+            color: const Color(0xFF00F5D4), // Monad cyan accent
           ),
         ),
         if (unit.isNotEmpty) ...[
@@ -408,7 +408,7 @@ class TerritoryBottomSheet extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey[600]!, width: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                color: const Color(0xFF2D2D2D),
+                color: const Color(0xFF1C1733),
               ),
               child: const Center(
                 child: Text(
@@ -436,7 +436,7 @@ class TerritoryBottomSheet extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey[600]!, width: 0.5),
                       borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFF2D2D2D),
+                      color: const Color(0xFF1C1733),
                     ),
                     child: Row(
                       children: [
@@ -667,7 +667,7 @@ class TerritoryBottomSheet extends StatelessWidget {
   //   return Container(
   //     padding: const EdgeInsets.all(16),
   //     decoration: BoxDecoration(
-  //       color: const Color(0xFF2D2D2D), // Dark card background
+  //       color: const Color(0xFF1C1733), // Dark card background
   //       borderRadius: BorderRadius.circular(12),
   //       border: Border.all(color: Colors.grey[700]!, width: 0.5), // Subtle border
   //     ),
