@@ -111,12 +111,39 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-              title: 'Trackt',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      title: 'Trackt',
+      debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
+      theme: _tracktTheme,
+      darkTheme: _tracktTheme,
       initialRoute: AppRoutes.splash,
       onGenerateRoute: (settings) => AppRoutes.generateRoute(settings),
     );
   }
+
+  /// Premium Monad dark theme shared app-wide (purple #8338EC, cyan #00F5D4,
+  /// deep background #141124).
+  static final ThemeData _tracktTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: const Color(0xFF141124),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF8338EC),
+      brightness: Brightness.dark,
+      primary: const Color(0xFF8338EC),
+      secondary: const Color(0xFF00F5D4),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF141124),
+      foregroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: false,
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: Color(0xFF00F5D4),
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
 }
