@@ -218,7 +218,7 @@ class _ProfileViewState extends State<ProfileView> {
                 _changeUserColor(tempColor);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: const Color(0xFF8338EC),
               ),
               child: const Text(
                 'Apply',
@@ -272,7 +272,7 @@ class _ProfileViewState extends State<ProfileView> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xFF8338EC),
             ),
             child: const Text(
               'Change Color',
@@ -539,7 +539,7 @@ class _ProfileViewState extends State<ProfileView> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.blue),
+                        borderSide: const BorderSide(color: const Color(0xFF8338EC)),
                       ),
                     ),
                   ),
@@ -679,7 +679,7 @@ class _ProfileViewState extends State<ProfileView> {
     return Column(
       children: [
         _ActionTile(
-          color: Colors.blue,
+          color: const Color(0xFF8338EC),
           icon: Icons.history,
           title: 'Territory History',
           onTap: () {
