@@ -75,6 +75,16 @@ Finishing a real (non-sim) run now shows the same Monad victory dialog (badge re
 - [ ] "View Territory on Map" button returns to the map (no double-navigation — auto-nav is suppressed while the dialog is up).
 - [ ] Balance increases by the awarded $TRACKT.
 
+## Scan + UX pass (navigation, theme, cleanup)
+From a full app scan. Functional fixes + cohesion.
+- [ ] **Forgot-password now works**: Sign In → "Forgot Password?" → reset flow no longer hits "Page not found" (routes `/reset-password-request` + `/reset-password-verify` registered).
+- [ ] **Shop is in the bottom nav** now (World / Club / Quests / Shop / Profile) — no longer buried only in Profile. Tap Shop → Power-Up Shop.
+- [ ] **Consistent dark Monad theme** app-wide (bg #141124, cyan-accent nav). Check all 5 tabs look cohesive, text readable, nothing washed-out/invisible on the dark background.
+- [ ] Quests / Profile / Club backgrounds match the Monad theme (no leftover grey/black87 panels clashing).
+- [ ] Removed dead screens (AddPasswordView, NotificationsSection) — nothing should navigate to them; confirm no broken links.
+- [ ] Known-minor (not blocking): Daily Quests is one focused challenge card; `coins_earned_animation.dart` exists but is unwired; conquest/Shield still backend-scoped.
+
+
 
 
 
