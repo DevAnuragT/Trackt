@@ -127,7 +127,7 @@ class _SignUpViewState extends State<SignUpView> {
                   const SizedBox(height: 30),
                   const Icon(
                     Icons.favorite_border,
-                    color: Colors.blueAccent,
+                    color: const Color(0xFF8338EC),
                     size: 80,
                   ),
                   const SizedBox(height: 20),
@@ -259,7 +259,7 @@ class _SignUpViewState extends State<SignUpView> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _signUpWithEmail,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: const Color(0xFF8338EC),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -343,7 +343,7 @@ class _SignUpViewState extends State<SignUpView> {
                         onPressed: () => Navigator.pushReplacementNamed(context, '/signin'),
                         child: const Text(
                           'Sign In',
-                          style: TextStyle(color: Colors.blueAccent),
+                          style: TextStyle(color: const Color(0xFF8338EC)),
                         ),
                       )
                     ],
