@@ -127,7 +127,7 @@ class _OTPVerificationViewState extends State<OTPVerificationView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D), // dark background
+      backgroundColor: const Color(0xFF0F0F11), // dark background
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -198,7 +198,7 @@ class _OTPVerificationViewState extends State<OTPVerificationView> {
                         letterSpacing: 8,
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
+                      fillColor: const Color(0xFF202024),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -287,7 +287,7 @@ class _OTPVerificationViewState extends State<OTPVerificationView> {
                   Container(
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
+                      color: const Color(0xFF202024),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(

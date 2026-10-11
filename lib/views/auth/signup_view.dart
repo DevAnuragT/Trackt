@@ -107,7 +107,7 @@ class _SignUpViewState extends State<SignUpView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D), // dark background
+      backgroundColor: const Color(0xFF0F0F11), // dark background
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -158,7 +158,7 @@ class _SignUpViewState extends State<SignUpView> {
                       hintText: 'Email ID',
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
+                      fillColor: const Color(0xFF202024),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -185,7 +185,7 @@ class _SignUpViewState extends State<SignUpView> {
                       hintText: 'Password',
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
+                      fillColor: const Color(0xFF202024),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -218,7 +218,7 @@ class _SignUpViewState extends State<SignUpView> {
                       hintText: 'Confirm Password',
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
+                      fillColor: const Color(0xFF202024),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -331,7 +331,7 @@ class _SignUpViewState extends State<SignUpView> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _signUpWithGoogle,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2A2A2A),
+                        backgroundColor: const Color(0xFF202024),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

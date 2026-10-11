@@ -357,7 +357,7 @@ class _FirstLaunchSetupPageState extends State<FirstLaunchSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF0F0F11),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),

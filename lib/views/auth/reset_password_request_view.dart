@@ -69,7 +69,7 @@ class _ResetPasswordRequestViewState extends State<ResetPasswordRequestView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
+      backgroundColor: const Color(0xFF0F0F11),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -119,7 +119,7 @@ class _ResetPasswordRequestViewState extends State<ResetPasswordRequestView> {
                       hintText: 'Email ID',
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       filled: true,
-                      fillColor: const Color(0xFF1A1A1A),
+                      fillColor: const Color(0xFF202024),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
