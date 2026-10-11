@@ -11,5 +11,6 @@ class MainNavigationController extends GetxController {
   void goToWorld() => currentIndex.value = 0;
   void goToClub() => currentIndex.value = 1;
   void goToDailyQuests() => currentIndex.value = 2;
-  void goToProfile() => currentIndex.value = 3;
+  void goToStore() => currentIndex.value = 3;
+  void goToProfile() => currentIndex.value = 4;
 }

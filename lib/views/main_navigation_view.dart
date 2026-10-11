@@ -7,6 +7,7 @@ import '../views/map/components/bottom_sheet_widget.dart';
 import 'map/map_view.dart';
 import 'club/club_view.dart';
 import 'daily_quests/daily_quests_view.dart';
+import 'store/store_view.dart';
 import 'profile_view.dart';
 import '../services/location_permission_service.dart';
 
@@ -107,7 +108,8 @@ class _MainNavigationViewState extends State<MainNavigationView> {
         children: [
           const MapView(),           // World tab
           const ClubView(),          // Club tab
-          const DailyQuestsView(),   // Daily Quests tab
+          const DailyQuestsView(),   // Quests tab
+          const StoreView(),         // Shop tab
           const ProfileView(),       // Profile tab
         ],
       )),
@@ -115,9 +117,11 @@ class _MainNavigationViewState extends State<MainNavigationView> {
         currentIndex: controller.currentIndex.value,
         onTap: controller.changeTab,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.black87,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+        backgroundColor: const Color(0xFF141124),
+        selectedItemColor: const Color(0xFF00F5D4),
+        unselectedItemColor: Colors.white54,
+        selectedFontSize: 11,
+        unselectedFontSize: 11,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.public),
@@ -130,6 +134,10 @@ class _MainNavigationViewState extends State<MainNavigationView> {
           BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events),
             label: 'Quests',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.storefront),
+            label: 'Shop',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
