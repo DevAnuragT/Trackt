@@ -18,29 +18,17 @@ class DailyQuestsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: SafeArea(
-        child:
-    Scaffold(
-      backgroundColor: Colors.black87,
-      body: Padding(
+    return Scaffold(
+      backgroundColor: const Color(0xFF141124),
+      appBar: AppBar(
+        title: const Text('Daily Quests'),
+        backgroundColor: const Color(0xFF141124),
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: ListView(
         padding: const EdgeInsets.all(20.0),
-    child: Column(
-          children: [
-      // Header (reduced spacing & font size)
-      Row(
-              children: [
-                Icon(
-                  Icons.emoji_events,
-                  size: 32,
-                  color: Colors.amber[400],
-                ),
-                const SizedBox(width: 12),
-        const Text('Daily Quests', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.white)),
-              ],
-            ),
-      const SizedBox(height: 20),
+        children: [
             // Daily Challenge Card
             Builder(
               builder: (context) {
@@ -57,7 +45,7 @@ class DailyQuestsView extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: completed
                             ? [Colors.green[600]!, Colors.green[400]!]
-                            : [Colors.indigo[700]!, Colors.indigo[400]!],
+                            : [const Color(0xFF8338EC), const Color(0xFF3A86FF)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -163,15 +151,15 @@ class DailyQuestsView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[900],
+                color: const Color(0xFF1C1733),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[700]!),
+                border: Border.all(color: const Color(0xFF8338EC).withValues(alpha: 0.35)),
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline,
-                    color: Colors.blue[400],
+                    color: Color(0xFF00F5D4),
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -189,8 +177,6 @@ class DailyQuestsView extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    ),),
     );
   }
 }
