@@ -138,15 +138,8 @@ class _UserStatsPageState extends State<UserStatsPage> {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF202024),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey[700]!, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF2A2A2F)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(3),

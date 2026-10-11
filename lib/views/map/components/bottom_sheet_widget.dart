@@ -110,13 +110,9 @@ class TerritoryBottomSheet extends StatelessWidget {
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black54,
-                    blurRadius: 15,
-                    offset: Offset(0, -3),
-                  ),
-                ],
+                border: Border(
+                  top: BorderSide(color: Color(0xFF2A2A2F)),
+                ),
               ),
               child: SingleChildScrollView(
                 controller: scrollController,

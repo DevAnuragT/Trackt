@@ -437,15 +437,8 @@ class _ProfileViewState extends State<ProfileView> {
         child: Row(
           children: [
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
               ),
               child: CircleAvatar(
                 radius: 40,
@@ -606,18 +599,9 @@ class _ProfileViewState extends State<ProfileView> {
                     decoration: BoxDecoration(
                       color: color,
                       borderRadius: BorderRadius.circular(12), // Square with curved corners
-                      boxShadow: [
-                        if (_prefs!.userColor.value == color)
-                          BoxShadow(
-                            color: color.withOpacity(0.7),
-                            blurRadius: 18,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 0),
-                          ),
-                      ],
                       border: Border.all(
-                        color: _prefs!.userColor.value == color 
-                            ? Colors.white 
+                        color: _prefs!.userColor.value == color
+                            ? Colors.white
                             : Colors.grey[600]!,
                         width: _prefs!.userColor.value == color ? 3 : 2,
                       ),
