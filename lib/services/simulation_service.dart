@@ -341,17 +341,22 @@ class SimulationService extends GetxService {
 
       lastResult.value = result;
       isSimulating.value = false;
-      currentPhase.value = 'Conquest Completed!';
+      currentPhase.value = 'Zooming out to your territory…';
 
-      // Pop up the Victory Dialog for the evaluator
-      Future.delayed(const Duration(milliseconds: 350), () {
-        if (Get.context != null) {
-          Get.dialog(
-            SimulationVictoryDialog(result: result),
-            barrierDismissible: true,
-          );
-        }
-      });
+      // 1) Let the territory finish drawing, then zoom the run map out so the
+      //    whole conquered loop is visible. 2) Hold a beat so it registers.
+      //    3) Then celebrate with the victory dialog.
+      await Future.delayed(const Duration(milliseconds: 600));
+      await runController.fitRunMapToTerritory();
+      currentPhase.value = 'Territory conquered! 🎉';
+      await Future.delayed(const Duration(milliseconds: 1600));
+
+      if (Get.context != null) {
+        Get.dialog(
+          SimulationVictoryDialog(result: result),
+          barrierDismissible: true,
+        );
+      }
     } catch (e) {
       print('❌ Error completing simulation: $e');
       isSimulating.value = false;

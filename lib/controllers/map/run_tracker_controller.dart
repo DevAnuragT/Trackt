@@ -256,6 +256,34 @@ class RunTrackerController extends GetxController {
     }
   }
 
+  /// Zoom the run map out to frame the entire conquered territory (the full
+  /// loop) so the runner can see what they just claimed before leaving.
+  Future<void> fitRunMapToTerritory() async {
+    if (_runMap == null || _rawPathPoints.length < 2) return;
+    try {
+      final coords = _rawPathPoints
+          .map((p) => Point(coordinates: Position(p.longitude, p.latitude)))
+          .toList();
+      final camera = await _runMap!.cameraForCoordinates(
+        coords,
+        MbxEdgeInsets(top: 140, left: 60, bottom: 220, right: 60),
+        null,
+        null,
+      );
+      await _runMap!.flyTo(camera, MapAnimationOptions(duration: 1400));
+      // Remember where the conquest happened so the world map can focus it.
+      final c = _calculateCenter(_rawPathPoints);
+      lastConquestLat = c.latitude;
+      lastConquestLng = c.longitude;
+    } catch (e) {
+      print('⚠️ Could not frame territory: $e');
+    }
+  }
+
+  // Center of the last conquered territory, for the world map to fly to.
+  static double? lastConquestLat;
+  static double? lastConquestLng;
+
   Future<bool> startRun() async {
     if (isRunning.value || runState.value != RunState.idle) return false;
     

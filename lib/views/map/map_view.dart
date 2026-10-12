@@ -4,6 +4,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../controllers/map/map_controller.dart';
 import '../../controllers/map/territory_display_controller.dart';
 import '../../controllers/map/run_path_display_controller.dart';
+import '../../controllers/map/run_tracker_controller.dart';
 import '../../controllers/location/location_controller.dart';
 import '../../services/location_service.dart';
 import 'components/map_controls_widget.dart';
@@ -169,14 +170,35 @@ class _MapViewState extends State<MapView> {
     try {
       // Wait a bit for location services to be ready
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       if (mounted && mapController.mapboxMap != null) {
+        // If the user just conquered a simulated territory, fly there so they
+        // can find what they claimed instead of snapping back to their GPS.
+        final cLat = RunTrackerController.lastConquestLat;
+        final cLng = RunTrackerController.lastConquestLng;
+        if (cLat != null && cLng != null) {
+          RunTrackerController.lastConquestLat = null;
+          RunTrackerController.lastConquestLng = null;
+          await mapController.mapboxMap!.flyTo(
+            CameraOptions(
+              center: Point(coordinates: Position.named(lng: cLng, lat: cLat)),
+              zoom: 15.5,
+              bearing: 0.0,
+              pitch: 0.0,
+            ),
+            MapAnimationOptions(duration: 1600),
+          );
+          await territoryDisplayController
+              .refreshTerritoriesForNewLocation(cLat, cLng);
+          return;
+        }
+
         // Get the location service directly
         final locationService = Get.find<LocationService>();
-        
+
         // Check if we have a current location
         final currentLocation = await locationService.getCurrentPosition();
-        
+
         if (currentLocation != null) {
           print('🗺️ Centering map on user location: ${currentLocation.latitude}, ${currentLocation.longitude}');
           

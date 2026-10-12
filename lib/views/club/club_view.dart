@@ -76,7 +76,10 @@ class _ClubViewState extends State<ClubView> {
                         child: ElevatedButton.icon(
                           onPressed: () => _showCreateClub(context),
                           icon: const Icon(Icons.add_circle_outline, size: 18),
-                          label: const Text('Create Club'),
+                          label: const Text('Create Club', maxLines: 1),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -84,7 +87,10 @@ class _ClubViewState extends State<ClubView> {
                         child: OutlinedButton.icon(
                           onPressed: () => _showJoinClub(context),
                           icon: const Icon(Icons.group_add_outlined, size: 18),
-                          label: const Text('Join Club'),
+                          label: const Text('Join Club', maxLines: 1),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
                         ),
                       ),
                     ],
