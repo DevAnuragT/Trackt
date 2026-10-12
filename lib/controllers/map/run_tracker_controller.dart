@@ -52,6 +52,7 @@ class RunTrackerController extends GetxController {
   String? _lastClaimExplorerUrl; // explorer URL for the last claim
   Future<void>? _pendingClaimFuture; // in-flight on-chain claim for the active run
   bool _victoryShown = false; // suppress auto-nav when the victory dialog is up
+  bool _dailyChallengeAttempted = false; // ensure one award attempt per run
   final RxInt rejectedGpsPoints = 0.obs; // Anti-cheat: count of implausible-speed rejects
   final RxInt lastRewardCoins = 0.obs; // $TRACKT awarded for the last completed run
   
@@ -634,6 +635,7 @@ class RunTrackerController extends GetxController {
     currentPath.clear();
     _rawPathPoints.clear();
     _lastPosition = null;
+    _dailyChallengeAttempted = false; // fresh run → allow a new award attempt
     _runStartTime = null;
     
     print('✅ Tracking data reset complete');
@@ -1274,6 +1276,11 @@ class RunTrackerController extends GetxController {
       // Judge simulation. Guarded so test environments without the service pass.
       _pendingClaimFuture = _dispatchMonadClaim(newTerritory);
       _awardRunReward(area);
+      // Update the daily challenge from this run (real runs only). Independent
+      // of navigation so it fires even when a victory dialog handles routing.
+      if (!isSimulating.value) {
+        _attemptDailyChallengeAward();
+      }
 
       
       // Verify polygon closure
@@ -2035,6 +2042,8 @@ class RunTrackerController extends GetxController {
   
   /// Attempt daily challenge award (server-side single-award safeguard)
   Future<void> _attemptDailyChallengeAward() async {
+    if (_dailyChallengeAttempted) return; // one attempt per completed run
+    _dailyChallengeAttempted = true;
     try {
       final runDurationMinutes = runDuration.value.inMinutes;
       final runDistanceMeters = totalDistance.value;
