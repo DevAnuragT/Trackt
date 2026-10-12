@@ -369,55 +369,47 @@ class LocationPermissionService extends GetxService {
   Future<bool> _showAllowAllTimeDialog() async {
     bool? result = await Get.dialog<bool>(
       AlertDialog(
-        backgroundColor: const Color(0xFF202024),
-        title: Row(
+        backgroundColor: const Color(0xFF17171A),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.track_changes, color: Colors.blue, size: 28),
-            const SizedBox(width: 12),
+            Icon(Icons.track_changes, color: Color(0xFF6366F1), size: 20),
+            SizedBox(width: 8),
             Flexible(
               child: Text(
-                'Better Run Tracking',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                'Better run tracking',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
         content: const Text(
-          'Allowing location access "All the time" will:\n\n'
-          '• Track your runs even when the app is in the background\n'
-          '• Provide more accurate territory boundaries\n'
-          '• Ensure no GPS data is lost during your run\n\n'
-          'This is especially important for longer runs where you might need to check other apps.',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
+          'Set location to "Allow all the time" so runs keep tracking in the '
+          'background and no GPS is lost. We\'ll open settings for you.',
+          style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.35),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text(
-              'Not Now',
-              style: TextStyle(color: Colors.grey),
-            ),
+            child: const Text('Not now', style: TextStyle(color: Colors.grey)),
           ),
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: () async {
               Get.back(result: true);
-              // Try to open app settings with proper error handling
               await _openAppSettingsWithFallback();
             },
-            icon: const Icon(Icons.check),
-            label: const Text('OK'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
+            child: const Text('Open settings'),
           ),
         ],
       ),
       barrierDismissible: false,
     );
-    
+
     return result ?? false;
   }
 
