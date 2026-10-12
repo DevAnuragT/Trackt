@@ -117,6 +117,19 @@ Once `MONAD_TERRITORY_CONTRACT` is set, completed runs broadcast a real `claimTe
 
 To build, test, and deploy the contracts, see [`contracts/README.md`](contracts/README.md).
 
+### Sponsor integration deployment
+
+The [Envio indexer](indexer/README.md) is ready to deploy from branch `monad`
+with root directory `indexer` and config file `config.yaml`. It indexes real
+Monad territory claims and conquests; authorizing the GitHub App alone does
+not deploy it.
+
+The [secure KIMI proxy](supabase/README.md) uses Supabase user authentication
+and a server-side secret. Apply its isolated quota migration before live use.
+Never package KIMI credentials or Supabase deployment/service-role keys in
+Flutter assets. The current mobile AI wiring is still being migrated to this
+proxy; these deployment files alone are not a finished in-app integration.
+
 > **Deployed on Monad Testnet (Chain ID `10143`):**
 > - `TerritoryRegistry`: [`0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1`](https://testnet.monadexplorer.com/address/0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1)
 > - `RunRewardToken` ($TRACKT): [`0x3f660583F7D2Fbf2f2484b468BE3F7e3121Bf8B6`](https://testnet.monadexplorer.com/address/0x3f660583F7D2Fbf2f2484b468BE3F7e3121Bf8B6)

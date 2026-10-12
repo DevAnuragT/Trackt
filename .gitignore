@@ -96,6 +96,10 @@ indexer/.envio/
 indexer/.pnpm-store/
 indexer/generated/
 
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+
 # Local development scripts
 run_app.sh
 quick_run.sh

@@ -213,3 +213,39 @@ All mobile-side roadmap priorities P0–P3 are implemented, unit/widget-tested, 
 - **Hygiene**: removed 4 zero-byte ghost stub files; made `DatabaseService` resilient when Supabase isn't initialized.
 
 **Known gaps / next:** Shield has no effect yet (conquest resolution is still stubbed, pending teammate contracts); deployed contract addresses TBD; Mapbox visual polish and submission video outstanding. Manual on-device checks are tracked in [TESTING_NOTES.md](TESTING_NOTES.md).
+
+## 10. Integration handoff - October 12, 2026
+
+Current app/network configuration uses Monad Testnet chain **10143**, not the
+older `143` references above. Before extending the sponsor integrations, the
+existing Flutter baseline was verified: **48 tests pass**, no analyzer compile
+errors, and 1,011 existing lint/info/warning findings.
+
+- **Envio:** the deployable `indexer/` is published on `monad`; strict TypeScript
+  and four real-handler tests pass. Deploy it in Envio Cloud with root
+  `indexer`, branch `monad`, and config `config.yaml`. The hosted GraphQL
+  endpoint is not configured yet. See [indexer/README.md](indexer/README.md).
+- **KIMI:** Supabase CLI access and server-side `KIMI_API_KEY` are verified.
+  The key's model listing includes `kimi-k2.6`, not the old
+  `moonshot-v1-8k`; the server model is set to `kimi-k2.6`.
+  A real completion check returns HTTP 429: the KIMI account is suspended
+  for insufficient balance. The user must add API credit or resolve billing;
+  model-list access alone does not mean generation works.
+  The authenticated `conquest-ai` function is deployed, but its quota SQL
+  migration still needs to be run in the existing project's SQL Editor.
+  CLI database-role initialization fails and direct credential access needs
+  Keychain approval. Requests fail closed until the migration is applied.
+  See [supabase/README.md](supabase/README.md). Prior uncommitted mobile AI
+  changes are preserved; the UI/client integration is not complete.
+- **Privy:** App ID is set; `PRIVY_CLIENT_ID` is still missing. The mobile client
+  must allow `com.devanuragt.starlink_outpost_app` and URL scheme `trackt`;
+  Email OTP also needs to be enabled before wallet login can be demonstrated.
+  The SDK requires Android API 27+ and iOS 17+; no platform support changes
+  have been made. Keep the existing burner wallet and funds intact.
+- **Alchemy:** credential is present, but the provider returns HTTP 403:
+  `MONAD_TESTNET is not enabled for this app`. Enable Monad Testnet in that
+  app's Alchemy dashboard before switching the mobile RPC to it.
+
+The connected Android device was no longer available by the end of this
+setup check. Real wallet login, funding and live claims still need device
+verification; configuration alone does not establish bounty eligibility.
