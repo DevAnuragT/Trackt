@@ -43,6 +43,7 @@ dependencies:
 
   # Monad Web3 blockchain client (burner wallet + Testnet RPC dispatch)
   web3dart: ^2.7.3
+  qr_flutter: ^4.1.0
   
   # Map & Location dependencies
   mapbox_maps_flutter: ^2.0.0

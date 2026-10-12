@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../services/monad_service.dart';
 
@@ -95,23 +96,34 @@ class MonadWalletPill extends StatelessWidget {
             const SizedBox(height: 10),
             Obx(() => _row('\$TRACKT', monad.tracktBalance.value.toStringAsFixed(0))),
             const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: OutlinedButton.icon(
-                onPressed: () => _openAddressExplorer(monad),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF6366F1),
-                  side: const BorderSide(color: Color(0xFF6366F1)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 44,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showReceiveSheet(monad),
+                      icon: const Icon(Icons.qr_code_2, size: 18),
+                      label: const Text('Add MON'),
+                    ),
+                  ),
                 ),
-                icon: const Icon(Icons.open_in_new, size: 16),
-                label: const Text('View on Monad Explorer'),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SizedBox(
+                    height: 44,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _openAddressExplorer(monad),
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text('Explorer'),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             const Text(
-              'Burner wallet generated on-device. Gasless-feeling: no popups mid-run.',
+              'On-device burner wallet. Runs settle in the background — gas is tiny on Monad. Top up MON if your balance runs low.',
               style: TextStyle(color: Colors.white38, fontSize: 11),
             ),
           ],
@@ -153,6 +165,107 @@ class MonadWalletPill extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  /// Receive/top-up sheet: QR of the burner address + copy + faucet link, so a
+  /// user can fund their wallet with testnet MON from the Monad faucet or
+  /// another wallet. (Real runs settle fine on the local proof when unfunded.)
+  void _showReceiveSheet(MonadService monad) {
+    final address = monad.walletAddress.value;
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Color(0xFF17171A),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Add MON to your wallet',
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Send Monad Testnet MON to this address (faucet or another wallet).',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: QrImageView(
+                data: address,
+                version: QrVersions.auto,
+                size: 180,
+                backgroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF202024),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      address,
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'monospace'),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: address));
+                      Get.snackbar('Copied', 'Wallet address copied',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xFF202024),
+                          colorText: Colors.white);
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(Icons.copy, color: Color(0xFF6366F1), size: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton.icon(
+                onPressed: () => _open('https://faucet.monad.xyz'),
+                icon: const Icon(Icons.water_drop_outlined, size: 18),
+                label: const Text('Open Monad Faucet'),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  Future<void> _open(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        Clipboard.setData(ClipboardData(text: url));
+      }
+    } catch (_) {
+      Clipboard.setData(ClipboardData(text: url));
+    }
   }
 
   Future<void> _openAddressExplorer(MonadService monad) async {
