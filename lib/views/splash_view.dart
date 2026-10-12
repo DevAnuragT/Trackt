@@ -61,24 +61,10 @@ class _SplashViewState extends State<SplashView> {
             }
           }
           
-          // User is authenticated, check if setup is completed
-          // Check local preferences first (more reliable)
-          if (prefs.hasCompletedSetup) {
-            // User has completed setup locally, go directly to home
-            print('✅ User authenticated and setup completed locally, going to home');
-            Get.offAllNamed('/home');
-          } else {
-            // Check Supabase metadata as fallback
-            if (user.userMetadata?['username'] != null && 
-                (user.userMetadata?['username'] as String).isNotEmpty) {
-              print('✅ User authenticated and setup completed in Supabase, going to home');
-              Get.offAllNamed('/home');
-            } else {
-              // User is authenticated but needs to complete setup
-              print('⚠️ User authenticated but setup not completed, going to setup');
-              Get.offAllNamed('/setup');
-            }
-          }
+          // A valid session means the user stays signed in — go straight to
+          // the app rather than re-running setup checks that could bounce them.
+          print('✅ Valid session restored, going to home');
+          Get.offAllNamed('/home');
         } else {
           // Check if this is first launch
           if (prefs.isFirstLaunch.value) {
