@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Central color tokens for Trackt's flat, modern, minimal design system.
-/// One restrained accent (emerald), neutral dark surfaces, no gradients/glows.
+/// One restrained accent, neutral dark surfaces, no gradients/glows.
 class AppColors {
   AppColors._();
 

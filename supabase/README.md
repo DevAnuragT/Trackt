@@ -41,7 +41,14 @@ Until the migration is applied, authenticated requests fail closed with HTTP
 
 ```sh
 node --experimental-strip-types --test supabase/functions/conquest-ai/handler.test.ts
+npx --yes deno test --allow-read --allow-env --allow-sys \
+  supabase/functions/conquest-ai/quota.test.ts
 ```
+
+The quota test runs the actual SQL migration in PostgreSQL WASM, without a
+Docker daemon or hosted database. It verifies the exact 20/100 daily caps,
+UTC dates, RLS, and service-only privileges. Test dependencies are pinned and
+are not included in the deployed function.
 
 Never put KIMI credentials, Supabase access tokens or service-role keys in
 Flutter assets. `SUPABASE_ANON_KEY` is a public client key, not deployment

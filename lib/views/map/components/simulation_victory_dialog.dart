@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../services/simulation_service.dart';
+import 'ai_recap_card.dart';
 
 class SimulationVictoryDialog extends StatelessWidget {
   final SimulationResult result;
@@ -23,9 +25,9 @@ class SimulationVictoryDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF17171A),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFF2A2A2F)),
+          border: Border.all(color: AppColors.border),
         ),
         child: SingleChildScrollView(
           child: Padding(
@@ -37,31 +39,50 @@ class SimulationVictoryDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF202024),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.bolt, color: Color(0xFF6366F1), size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            isSimulation ? 'MONAD METROPOLIS DEMO' : 'MONAD TESTNET',
-                            style: const TextStyle(
-                              color: Color(0xFF6366F1),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.8,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.bolt,
+                              color: AppColors.accent,
+                              size: 14,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                isSimulation
+                                    ? 'MONAD METROPOLIS DEMO'
+                                    : 'MONAD TESTNET',
+                                style: const TextStyle(
+                                  color: AppColors.accent,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white70, size: 20),
+                      icon: const Icon(
+                        Icons.close,
+                        color: AppColors.textSecondary,
+                        size: 20,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () => Get.back(),
@@ -76,12 +97,12 @@ class SimulationVictoryDialog extends StatelessWidget {
                   height: 48,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFF202024),
+                    color: AppColors.surfaceVariant,
                   ),
                   child: const Center(
                     child: Icon(
                       Icons.emoji_events_outlined,
-                      color: Color(0xFF6366F1),
+                      color: AppColors.accent,
                       size: 26,
                     ),
                   ),
@@ -92,7 +113,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                 const Text(
                   'Territory Conquered!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.2,
@@ -102,7 +123,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                 Text(
                   '${result.presetTitle} • ${result.city}',
                   style: const TextStyle(
-                    color: Colors.white70,
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                   ),
                   textAlign: TextAlign.center,
@@ -117,7 +138,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Area Claimed',
                         value: '${result.areaM2.toStringAsFixed(0)} m²',
                         icon: Icons.crop_free,
-                        color: const Color(0xFF6366F1),
+                        color: AppColors.accent,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -126,7 +147,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Loop Distance',
                         value: '${result.distanceMeters.toStringAsFixed(0)} m',
                         icon: Icons.directions_run,
-                        color: const Color(0xFFA1A1AA),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -139,7 +160,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Pacing Duration',
                         value: _formatDuration(result.duration),
                         icon: Icons.timer_outlined,
-                        color: const Color(0xFF6366F1),
+                        color: AppColors.accent,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -148,7 +169,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                         label: 'Tokens Earned',
                         value: '+${result.coinsEarned} \$TRACKT',
                         icon: Icons.monetization_on,
-                        color: const Color(0xFF6366F1),
+                        color: AppColors.accent,
                       ),
                     ),
                   ],
@@ -159,12 +180,9 @@ class SimulationVictoryDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF17171A),
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: const Color(0xFF6366F1).withValues(alpha: 0.4),
-                      width: 1,
-                    ),
+                    border: Border.all(color: AppColors.border, width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,37 +190,47 @@ class SimulationVictoryDialog extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF6366F1),
-                                  shape: BoxShape.circle,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.accent,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                'Monad Testnet (Chain ID 10143)',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(width: 6),
+                                const Expanded(
+                                  child: Text(
+                                    'Monad Testnet (Chain ID 10143)',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                              color: const Color(
+                                0xFF6366F1,
+                              ).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: const Text(
                               '10,000 TPS',
                               style: TextStyle(
-                                color: Color(0xFF6366F1),
+                                color: AppColors.accent,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -215,9 +243,9 @@ class SimulationVictoryDialog extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              'Tx: ${result.simulatedMonadTx}',
+                              '${result.settledOnChain ? 'Tx' : 'Local proof'}: ${result.simulatedMonadTx}',
                               style: const TextStyle(
-                                color: Colors.white60,
+                                color: AppColors.textSecondary,
                                 fontSize: 11,
                                 fontFamily: 'monospace',
                               ),
@@ -226,18 +254,26 @@ class SimulationVictoryDialog extends StatelessWidget {
                           ),
                           InkWell(
                             onTap: () {
-                              Clipboard.setData(ClipboardData(text: result.simulatedMonadTx));
+                              Clipboard.setData(
+                                ClipboardData(text: result.simulatedMonadTx),
+                              );
                               Get.snackbar(
-                                'Copied to Clipboard',
-                                'Monad transaction hash copied!',
+                                'Copied',
+                                result.settledOnChain
+                                    ? 'Transaction hash copied'
+                                    : 'Local proof copied',
                                 duration: const Duration(seconds: 2),
-                                backgroundColor: const Color(0xFF6366F1),
-                                colorText: Colors.white,
+                                backgroundColor: AppColors.accent,
+                                colorText: AppColors.textPrimary,
                               );
                             },
                             child: const Padding(
                               padding: EdgeInsets.all(4),
-                              child: Icon(Icons.copy, color: Color(0xFF6366F1), size: 14),
+                              child: Icon(
+                                Icons.copy,
+                                color: AppColors.accent,
+                                size: 14,
+                              ),
                             ),
                           ),
                         ],
@@ -245,10 +281,10 @@ class SimulationVictoryDialog extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         result.settledOnChain
-                            ? 'Broadcast on-chain. Territory polygon committed to Monad state.'
-                            : 'Sub-second finality verified. Territory polygon committed to state.',
+                            ? 'Broadcast on-chain. Check the receipt on Explorer for confirmation.'
+                            : 'Local proof only. On-chain settlement is not verified.',
                         style: const TextStyle(
-                          color: Colors.white38,
+                          color: AppColors.textSecondary,
                           fontSize: 10,
                         ),
                       ),
@@ -260,8 +296,11 @@ class SimulationVictoryDialog extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: () => _openExplorer(result.explorerUrl!),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF6366F1),
-                              side: const BorderSide(color: Color(0xFF6366F1), width: 1),
+                              foregroundColor: AppColors.accent,
+                              side: const BorderSide(
+                                color: AppColors.accent,
+                                width: 1,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -269,7 +308,10 @@ class SimulationVictoryDialog extends StatelessWidget {
                             icon: const Icon(Icons.open_in_new, size: 15),
                             label: const Text(
                               'View on Monad Explorer',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
@@ -280,6 +322,8 @@ class SimulationVictoryDialog extends StatelessWidget {
                 const SizedBox(height: 14),
 
                 // Action Buttons
+                AiRecapCard(result: result),
+                const SizedBox(height: 14),
                 SizedBox(
                   width: double.infinity,
                   height: 44,
@@ -289,9 +333,9 @@ class SimulationVictoryDialog extends StatelessWidget {
                       Get.offAllNamed('/home'); // Return to main map view
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6366F1),
-                      foregroundColor: Colors.white,
-                      elevation: 4,
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: AppColors.onAccent,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -301,11 +345,16 @@ class SimulationVictoryDialog extends StatelessWidget {
                       children: [
                         Icon(Icons.map, size: 18),
                         SizedBox(width: 8),
-                        Text(
-                          'View Territory on Map',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Text(
+                            'View Territory on Map',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -320,7 +369,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                   child: const Text(
                     'Close Details',
                     style: TextStyle(
-                      color: Colors.white60,
+                      color: AppColors.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -342,7 +391,7 @@ class SimulationVictoryDialog extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF202024),
+        color: AppColors.surfaceVariant,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -356,7 +405,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                 child: Text(
                   label,
                   style: const TextStyle(
-                    color: Colors.white60,
+                    color: AppColors.textSecondary,
                     fontSize: 10,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -368,7 +417,7 @@ class SimulationVictoryDialog extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -389,8 +438,8 @@ class SimulationVictoryDialog extends StatelessWidget {
           'Explorer link copied',
           'Could not open browser; link copied to clipboard.',
           duration: const Duration(seconds: 2),
-          backgroundColor: const Color(0xFF6366F1),
-          colorText: Colors.white,
+          backgroundColor: AppColors.accent,
+          colorText: AppColors.textPrimary,
         );
       }
     } catch (_) {

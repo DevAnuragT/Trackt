@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'package:web3dart/web3dart.dart';
 import 'package:web3dart/crypto.dart';
 
 import 'env_config.dart';
+import 'embedded_wallet_service.dart';
 
 /// Client-side Monad Testnet Web3 integration.
 ///
@@ -21,6 +23,22 @@ import 'env_config.dart';
 /// and a settlement proof hash so the Judge Demo never breaks.
 class MonadService extends GetxService {
   static const String _privateKeyPrefKey = 'monad_burner_private_key';
+  final EmbeddedWalletService? embeddedWallet;
+  Worker? _walletWorker;
+  final lastClaimError = RxnString();
+
+  MonadService({this.embeddedWallet, http.Client? client})
+    : _httpClient = client;
+
+  static Future<void> clearUserPreferencesPreservingWallet(
+    SharedPreferences prefs,
+  ) async {
+    for (final key in prefs.getKeys()) {
+      if (key != _privateKeyPrefKey && key != 'isFirstLaunch') {
+        await prefs.remove(key);
+      }
+    }
+  }
 
   // Minimal ABI matching the teammate's TerritoryRegistry.sol interface.
   static const String _territoryAbi = '''[
@@ -53,7 +71,7 @@ class MonadService extends GetxService {
   final RxString walletAddress = ''.obs;
   final RxDouble monBalance = 0.0.obs; // native MON gas balance
   final RxDouble tracktBalance = 0.0.obs; // \$TRACKT ERC-20 reward balance
-  final RxBool isReady = false.obs; // RPC reachable + wallet loaded
+  final RxBool isReady = false.obs; // wallet loaded + RPC client configured
   final RxBool isClaiming = false.obs;
   final RxString lastTxHash = ''.obs;
   final RxBool lastTxOnChain = false.obs; // true if a real tx was broadcast
@@ -64,9 +82,37 @@ class MonadService extends GetxService {
   EthereumAddress? _address;
 
   int get chainId => EnvConfig.monadChainId;
-  String get rpcUrl => EnvConfig.monadRpcUrl;
+  String get rpcUrl => resolveRpcUrl(
+    provider: EnvConfig.monadRpcProvider,
+    publicUrl: EnvConfig.monadRpcUrl,
+    alchemyKey: EnvConfig.alchemyApiKey,
+  );
 
-  EthereumAddress? get address => _address;
+  static String resolveRpcUrl({
+    required String provider,
+    required String publicUrl,
+    required String alchemyKey,
+  }) {
+    switch (provider) {
+      case 'public':
+        return publicUrl;
+      case 'alchemy':
+        if (alchemyKey.trim().isEmpty) {
+          throw StateError('Alchemy selected, but ALCHEMY_API_KEY is missing.');
+        }
+        return 'https://monad-testnet.g.alchemy.com/v2/${alchemyKey.trim()}';
+      default:
+        throw StateError('MONAD_RPC_PROVIDER must be public or alchemy.');
+    }
+  }
+
+  bool get usesEmbeddedWallet => embeddedWallet?.isSelected.value ?? false;
+  String get burnerAddress => _address?.hexEip55 ?? '';
+  EthereumAddress? get address {
+    if (!usesEmbeddedWallet) return _address;
+    final value = embeddedWallet!.walletAddress.value;
+    return value.isEmpty ? null : EthereumAddress.fromHex(value);
+  }
 
   bool get _hasTerritoryContract =>
       EnvConfig.monadTerritoryContract.trim().isNotEmpty;
@@ -74,19 +120,27 @@ class MonadService extends GetxService {
 
   Future<MonadService> init() async {
     try {
-      _httpClient = http.Client();
-      _client = Web3Client(rpcUrl, _httpClient!);
       await _loadOrCreateWallet();
-      // Fetch balances in the background; never block app boot on the network.
-      unawaited(refreshBalances());
+      _httpClient ??= http.Client();
+      _client = Web3Client(rpcUrl, _httpClient!);
+      if (embeddedWallet != null) {
+        _walletWorker = everAll([
+          embeddedWallet!.isSelected,
+          embeddedWallet!.walletAddress,
+        ], (_) => _syncWalletAddress());
+      }
+      _syncWalletAddress();
       isReady.value = true;
       // ignore: avoid_print
-      print('⛓️ MonadService ready. Wallet: ${walletAddress.value} (chain $chainId)');
+      print(
+        '⛓️ MonadService ready. Wallet: ${walletAddress.value} (chain $chainId)',
+      );
     } catch (e) {
       // Degrade gracefully: keep whatever wallet we loaded, mark not fully ready.
       isReady.value = false;
-      // ignore: avoid_print
-      print('⚠️ MonadService init issue (continuing in offline-proof mode): $e');
+      lastClaimError.value =
+          'Wallet initialization failed (${e.runtimeType}). Check RPC configuration.';
+      debugPrint('Monad: ${lastClaimError.value}');
     }
     return this;
   }
@@ -111,6 +165,13 @@ class MonadService extends GetxService {
     walletAddress.value = _address!.hexEip55;
   }
 
+  void _syncWalletAddress() {
+    walletAddress.value = address?.hexEip55 ?? '';
+    monBalance.value = 0;
+    tracktBalance.value = 0;
+    unawaited(refreshBalances());
+  }
+
   /// Short display form, e.g. 0x1234…aB9c for HUD pills.
   String get shortAddress {
     final a = walletAddress.value;
@@ -122,23 +183,28 @@ class MonadService extends GetxService {
   /// network errors so observables simply keep their last known value.
   Future<void> refreshBalances() async {
     final client = _client;
-    final addr = _address;
+    final addr = address;
     if (client == null || addr == null) return;
 
     try {
       final bal = await client.getBalance(addr);
-      monBalance.value = bal.getValueInUnit(EtherUnit.ether);
+      if (address == addr) {
+        monBalance.value = bal.getValueInUnit(EtherUnit.ether);
+      }
     } catch (e) {
       // ignore: avoid_print
-      print('⚠️ Could not fetch MON balance: $e');
+      print(
+        '⚠️ Could not fetch MON balance (${e.runtimeType}). Check RPC provider/network.',
+      );
     }
 
     if (_hasTokenContract) {
       try {
-        tracktBalance.value = await getTracktTokenBalance();
+        final balance = await getTracktTokenBalance();
+        if (address == addr) tracktBalance.value = balance;
       } catch (e) {
         // ignore: avoid_print
-        print('⚠️ Could not fetch \$TRACKT balance: $e');
+        print('⚠️ Could not fetch \$TRACKT balance (${e.runtimeType}).');
       }
     }
   }
@@ -147,7 +213,7 @@ class MonadService extends GetxService {
   /// Returns 0.0 when the token contract is not yet deployed/configured.
   Future<double> getTracktTokenBalance() async {
     final client = _client;
-    final addr = _address;
+    final addr = address;
     if (client == null || addr == null || !_hasTokenContract) return 0.0;
 
     final contract = DeployedContract(
@@ -177,8 +243,11 @@ class MonadService extends GetxService {
     required double centerLng,
     required double areaSqMeters,
   }) async {
+    final selectedPrivy = usesEmbeddedWallet;
+    final selectedAddress = address;
     isClaiming.value = true;
     lastTxOnChain.value = false;
+    lastClaimError.value = null;
     try {
       final client = _client;
       final creds = _credentials;
@@ -198,15 +267,52 @@ class MonadService extends GetxService {
             BigInt.from(areaSqMeters.round()),
           ];
 
-          final txHash = await client.sendTransaction(
-            creds,
-            Transaction.callContract(
-              contract: contract,
-              function: fn,
-              parameters: params,
-            ),
-            chainId: chainId,
+          final actualChainId = await client.getChainId().timeout(
+            const Duration(seconds: 10),
           );
+          if (actualChainId != BigInt.from(chainId)) {
+            throw StateError(
+              'RPC network does not match the configured chain.',
+            );
+          }
+          if (usesEmbeddedWallet != selectedPrivy ||
+              address != selectedAddress) {
+            throw StateError('Wallet selection changed during the claim.');
+          }
+          final String txHash;
+          if (selectedPrivy) {
+            final sender = selectedAddress;
+            if (sender == null) {
+              throw StateError('Reconnect your Privy wallet.');
+            }
+            final data = fn.encodeCall(params);
+            final gas = await client.estimateGas(
+              sender: sender,
+              to: contract.address,
+              data: data,
+            );
+            if (!usesEmbeddedWallet || address != selectedAddress) {
+              throw StateError(
+                'Wallet selection changed during gas estimation.',
+              );
+            }
+            txHash = await embeddedWallet!.sendTransaction(
+              to: contract.address.hexEip55,
+              data: bytesToHex(data, include0x: true),
+              chainId: chainId,
+              gas: gas,
+            );
+          } else {
+            txHash = await client.sendTransaction(
+              creds,
+              Transaction.callContract(
+                contract: contract,
+                function: fn,
+                parameters: params,
+              ),
+              chainId: chainId,
+            );
+          }
 
           lastTxHash.value = txHash;
           lastTxOnChain.value = true;
@@ -215,8 +321,10 @@ class MonadService extends GetxService {
           unawaited(refreshBalances());
           return txHash;
         } catch (e) {
-          // ignore: avoid_print
-          print('⚠️ On-chain claim failed, using local proof: $e');
+          lastClaimError.value = usesEmbeddedWallet
+              ? 'Privy claim failed. Check wallet connection, MON funding and RPC network.'
+              : 'On-chain claim failed. Check MON funding and RPC network.';
+          debugPrint('Monad: ${lastClaimError.value} (${e.runtimeType})');
         }
       }
 
@@ -257,6 +365,7 @@ class MonadService extends GetxService {
 
   @override
   void onClose() {
+    _walletWorker?.dispose();
     _client?.dispose();
     _httpClient?.close();
     super.onClose();

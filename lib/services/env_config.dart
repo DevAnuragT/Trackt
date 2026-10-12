@@ -62,4 +62,15 @@ class EnvConfig {
   static String get monadTerritoryContract =>
       _maybe('MONAD_TERRITORY_CONTRACT') ?? '';
   static String get monadTokenContract => _maybe('MONAD_TOKEN_CONTRACT') ?? '';
+
+  // Privy embedded wallet.
+  static String get privyAppId => _maybe('PRIVY_APP_ID') ?? '';
+  static String get privyClientId => _maybe('PRIVY_CLIENT_ID') ?? '';
+
+  // Opt in after enabling Monad Testnet in the Alchemy app.
+  static String get monadRpcProvider =>
+      _maybe('MONAD_RPC_PROVIDER') ?? 'public';
+  static String get alchemyApiKey => _maybe('ALCHEMY_API_KEY') ?? '';
+  static String get envioGraphqlUrl => _maybe('ENVIO_GRAPHQL_URL') ?? '';
+  static bool get aiRecapsEnabled => _maybe('AI_RECAPS_ENABLED') == 'true';
 }

@@ -21,6 +21,9 @@ import 'services/samsung_permission_helper.dart';
 import 'services/simulation_service.dart';
 import 'services/monad_service.dart';
 import 'services/power_up_service.dart';
+import 'services/ai_service.dart';
+import 'services/embedded_wallet_service.dart';
+import 'services/on_chain_leaderboard_service.dart';
 
 
 Future<void> main() async {
@@ -43,7 +46,9 @@ Future<void> main() async {
   // Initialize Supabase if configured
   final supaUrl = EnvConfig.supabaseUrl;
   final supaKey = EnvConfig.supabaseAnonKey;
-  if (supaUrl != null && supaUrl.isNotEmpty && supaKey != null && supaKey.isNotEmpty) {
+  final supabaseConfigured =
+      supaUrl != null && supaUrl.isNotEmpty && supaKey != null && supaKey.isNotEmpty;
+  if (supabaseConfigured) {
     await Supabase.initialize(
       url: supaUrl, 
       anonKey: supaKey,
@@ -68,7 +73,23 @@ Future<void> main() async {
     // Initialize UserPreferencesService asynchronously
     await Get.putAsync(() => UserPreferencesService().init());
     await Get.putAsync(() => PowerUpService().init());
-    await Get.putAsync(() => MonadService().init());
+    final embeddedWallet = await Get.putAsync(
+      () => EmbeddedWalletService(
+        currentAccountId: () => supabaseConfigured
+            ? Supabase.instance.client.auth.currentUser?.id
+            : null,
+      ).init(),
+    );
+    await Get.putAsync(() => MonadService(embeddedWallet: embeddedWallet).init());
+    Get.put(AiService(
+      projectUrl: supaUrl ?? '',
+      anonKey: supaKey ?? '',
+      accessToken: () => supabaseConfigured
+          ? Supabase.instance.client.auth.currentSession?.accessToken
+          : null,
+      enabled: EnvConfig.aiRecapsEnabled,
+    ));
+    Get.put(OnChainLeaderboardService(endpoint: EnvConfig.envioGraphqlUrl));
     Get.put(RunTrackerController());
     Get.put(SimulationService(), permanent: true);
     

@@ -86,6 +86,7 @@ For our day-by-day action plan leading to the October 13 deadline, see [HACKATHO
 * Flutter SDK (3.8+)
 * Dart SDK (3.8+)
 * Android Studio / Xcode
+* Android 9 / API 28+ or iOS 17+ (required by `privy_flutter` 0.11)
 
 ### Setup & Run
 1. Clone the repository:
@@ -127,8 +128,44 @@ not deploy it.
 The [secure KIMI proxy](supabase/README.md) uses Supabase user authentication
 and a server-side secret. Apply its isolated quota migration before live use.
 Never package KIMI credentials or Supabase deployment/service-role keys in
-Flutter assets. The current mobile AI wiring is still being migrated to this
-proxy; these deployment files alone are not a finished in-app integration.
+Flutter assets. The mobile victory dialog requests recaps asynchronously from
+this proxy, without delaying conquest results. AI is optional and disabled by
+default because listing KIMI models does not establish available API credit.
+After verifying usable API credit, set `AI_RECAPS_ENABLED=true` locally to
+enable it. Authentication, quota and provider failures are shown as errors,
+never presented as generated messages.
+
+Configure public mobile settings in `.env.dev` and rebuild/restart:
+
+```env
+PRIVY_APP_ID=your_public_app_id
+PRIVY_CLIENT_ID=your_public_mobile_client_id
+ENVIO_GRAPHQL_URL=https://your-public-indexer-endpoint
+MONAD_RPC_PROVIDER=alchemy
+ALCHEMY_API_KEY=your_restricted_rpc_key
+AI_RECAPS_ENABLED=false
+```
+
+Use `MONAD_RPC_PROVIDER=public` to retain the configured public RPC. Enable
+Monad Testnet in the Alchemy dashboard before selecting `alchemy`; the client
+rejects a wrong-chain RPC rather than signing on it.
+
+Tap the map's wallet pill to **Connect Privy wallet** or open **On-chain
+standings**. Privy uses email OTP and signs actual registry calls; it does not
+replace the Trackt/Supabase login. Selecting it creates/uses a separate address.
+The original burner address and private key remain intact, including during
+sign-out. Fund the selected wallet with Testnet MON; no funds are moved
+automatically. An offline/unverified selected Privy session is not silently
+replaced by the burner for signing.
+
+The leaderboard contains real indexed claims, not seeded rivals or local demo
+proofs. Missing configuration, an unavailable indexer, and an empty indexed
+chain have distinct states. A broadcast hash is not labeled confirmed;
+check its receipt on the explorer.
+
+Server-only local credentials are preserved in ignored `.env.server.local`
+(mode `0600`), outside all Flutter assets. For deployment use Supabase secrets;
+do not copy this local file into `pubspec.yaml` or the APK.
 
 > **Deployed on Monad Testnet (Chain ID `10143`):**
 > - `TerritoryRegistry`: [`0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1`](https://testnet.monadexplorer.com/address/0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1)

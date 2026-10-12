@@ -5,6 +5,41 @@ import 'package:trackt/services/monad_service.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('RPC selection is explicit and validates Alchemy configuration', () {
+    expect(
+      MonadService.resolveRpcUrl(
+        provider: 'public',
+        publicUrl: 'https://public.example',
+        alchemyKey: 'key',
+      ),
+      'https://public.example',
+    );
+    expect(
+      MonadService.resolveRpcUrl(
+        provider: 'alchemy',
+        publicUrl: 'https://public.example',
+        alchemyKey: 'key',
+      ),
+      'https://monad-testnet.g.alchemy.com/v2/key',
+    );
+    expect(
+      () => MonadService.resolveRpcUrl(
+        provider: 'alchemy',
+        publicUrl: 'https://public.example',
+        alchemyKey: '',
+      ),
+      throwsStateError,
+    );
+    expect(
+      () => MonadService.resolveRpcUrl(
+        provider: 'invalid',
+        publicUrl: 'https://public.example',
+        alchemyKey: '',
+      ),
+      throwsStateError,
+    );
+  });
+
   group('MonadService burner wallet', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});
@@ -43,22 +78,25 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('claimTerritoryOnChain returns a local proof hash when unset', () async {
-      final service = await MonadService().init();
+    test(
+      'claimTerritoryOnChain returns a local proof hash when unset',
+      () async {
+        final service = await MonadService().init();
 
-      final tx = await service.claimTerritoryOnChain(
-        territoryId: '550e8400-e29b-41d4-a716-446655440000',
-        centerLat: 40.7812,
-        centerLng: -73.9665,
-        areaSqMeters: 16850.0,
-      );
+        final tx = await service.claimTerritoryOnChain(
+          territoryId: '550e8400-e29b-41d4-a716-446655440000',
+          centerLat: 40.7812,
+          centerLng: -73.9665,
+          areaSqMeters: 16850.0,
+        );
 
-      expect(tx, startsWith('0x'));
-      expect(tx.length, 66); // 0x + 64 hex chars
-      expect(service.lastTxOnChain.value, isFalse);
-      expect(service.lastTxHash.value, tx);
-      expect(service.isClaiming.value, isFalse);
-    });
+        expect(tx, startsWith('0x'));
+        expect(tx.length, 66); // 0x + 64 hex chars
+        expect(service.lastTxOnChain.value, isFalse);
+        expect(service.lastTxHash.value, tx);
+        expect(service.isClaiming.value, isFalse);
+      },
+    );
 
     test('getTracktTokenBalance returns 0 when token contract unset', () async {
       final service = await MonadService().init();

@@ -1057,8 +1057,10 @@ class RunTrackerController extends GetxController {
       );
       lastMonadTxHash.value = txHash;
       lastMonadTxOnChain.value = monad.lastTxOnChain.value;
-      _lastClaimExplorerUrl = monad.explorerTxUrl(txHash);
-      print('⛓️ Monad territory claim settled: $txHash');
+      _lastClaimExplorerUrl = monad.lastTxOnChain.value
+          ? monad.explorerTxUrl(txHash)
+          : null;
+      print('⛓️ Territory claim proof: $txHash (broadcast: ${monad.lastTxOnChain.value})');
     } catch (e) {
       print('⚠️ Monad territory claim error: $e');
     }

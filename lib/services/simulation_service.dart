@@ -299,8 +299,8 @@ class SimulationService extends GetxService {
             centerLng: info.centerLng,
             areaSqMeters: area,
           );
-          explorerUrl = monad.explorerTxUrl(tx);
           onChain = monad.lastTxOnChain.value;
+          explorerUrl = onChain ? monad.explorerTxUrl(tx) : null;
         } else {
           final hex = math.Random().nextInt(0xFFFFFF).toRadixString(16).padLeft(6, '0');
           tx = '0x143a9b${hex}7c8d9e2f4a10bc39e143';

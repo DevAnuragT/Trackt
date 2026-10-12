@@ -223,28 +223,54 @@ errors, and 1,011 existing lint/info/warning findings.
 
 - **Envio:** the deployable `indexer/` is published on `monad`; strict TypeScript
   and four real-handler tests pass. Deploy it in Envio Cloud with root
-  `indexer`, branch `monad`, and config `config.yaml`. The hosted GraphQL
-  endpoint is not configured yet. See [indexer/README.md](indexer/README.md).
+  `indexer`, branch `monad`, and config `config.yaml`. The user deployed it and
+  saved its public GraphQL endpoint; the actual leaderboard query returns
+  HTTP 200 with a valid empty player array. Indexer metadata shows historical
+  sync in progress, not yet caught up to head.
+  See [indexer/README.md](indexer/README.md).
 - **KIMI:** Supabase CLI access and server-side `KIMI_API_KEY` are verified.
   The key's model listing includes `kimi-k2.6`, not the old
   `moonshot-v1-8k`; the server model is set to `kimi-k2.6`.
   A real completion check returns HTTP 429: the KIMI account is suspended
   for insufficient balance. The user must add API credit or resolve billing;
   model-list access alone does not mean generation works.
-  The authenticated `conquest-ai` function is deployed, but its quota SQL
-  migration still needs to be run in the existing project's SQL Editor.
-  CLI database-role initialization fails and direct credential access needs
-  Keychain approval. Requests fail closed until the migration is applied.
+  The authenticated `conquest-ai` function is deployed.
+  The user has applied the migration in the existing project's SQL Editor.
+  The live table is verified and an isolated authenticated call confirms that
+  user authentication and quota enforcement work. Its temporary test user was
+  removed. KIMI credits are still unavailable, so AI is intentionally off by
+  default (`AI_RECAPS_ENABLED=false`) and the core demo stays functional.
   See [supabase/README.md](supabase/README.md). Prior uncommitted mobile AI
-  changes are preserved; the UI/client integration is not complete.
-- **Privy:** App ID is set; `PRIVY_CLIENT_ID` is still missing. The mobile client
+  changes have been completed: the victory dialog now loads real recaps
+  asynchronously through the protected proxy, never with a bundled KIMI key.
+- **Privy:** the SDK, email OTP UI, wallet restoration, source selection,
+  account-bound signing and burner preservation are implemented and tested.
+  App ID and the mobile Client ID are now saved locally. The mobile client
   must allow `com.devanuragt.starlink_outpost_app` and URL scheme `trackt`;
-  Email OTP also needs to be enabled before wallet login can be demonstrated.
-  The SDK requires Android API 27+ and iOS 17+; no platform support changes
-  have been made. Keep the existing burner wallet and funds intact.
-- **Alchemy:** credential is present, but the provider returns HTTP 403:
-  `MONAD_TESTNET is not enabled for this app`. Enable Monad Testnet in that
-  app's Alchemy dashboard before switching the mobile RPC to it.
+  Email OTP must be enabled before wallet login can be demonstrated; the
+  user was given the Login methods dashboard link.
+  The installed SDK actually requires Android API 28+ and iOS 17+; native
+  targets and the `trackt` callback scheme have been updated accordingly.
+  Existing burner credentials now survive sign-out; funds never move
+  automatically. RPC/SDK tests verify the exact claim ABI and source-switching
+  races; these tests do not replace a live funded Privy transaction.
+- **Alchemy:** the user enabled Monad Testnet. The endpoint now returns
+  chain 10143, and the development app selects it explicitly using
+  `MONAD_RPC_PROVIDER=alchemy`. The public RPC remains an explicit option.
+
+Current Flutter suite: **76 tests pass**. Envio has four handler tests; the
+proxy has 12 HTTP tests and one real-PostgreSQL quota test. The Android debug
+APK builds successfully; its contents were checked for server secrets.
+Native build fixes include excluding duplicated OSGi manifest metadata and
+restoring Flutter's standard Gradle build output directory.
+Touched wallet, victory, AI and leaderboard UI uses the shared `AppColors`
+palette with flat controls, neutral borders and no glow/gradient decorations.
+The release APK (arm64, about 93 MB) also builds and launches on a fresh
+headless Android test device without crash markers. Both debug and release
+APK contents include the saved public settings and exclude server secrets.
+Historical Envio sync was diagnosed against the real public RPC: log ranges
+above 100 blocks return HTTP 413. The configuration now caps batches at 100
+to avoid repeated oversized requests and retry backoff.
 
 The connected Android device was no longer available by the end of this
 setup check. Real wallet login, funding and live claims still need device

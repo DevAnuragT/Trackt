@@ -20,6 +20,11 @@ Docker or a HyperSync token. `pnpm dev` additionally requires a running Docker
 daemon. Historical indexing uses the public Monad RPC, so no Envio API token
 is required by this configuration.
 
+The public RPC rejects `eth_getLogs` ranges above 100 blocks with HTTP 413.
+The indexer caps historical batches at this verified limit instead of
+repeatedly growing into rejected ranges and backing off. Initial history
+still takes time to sync; an empty player list does not mean sync is complete.
+
 ## Envio Cloud
 
 Authorize the Envio Deployments GitHub App for `DevAnuragT/Trackt`, then add an
@@ -56,6 +61,20 @@ query TracktLeaderboard {
     territoryCount
     totalArea
     conquestCount
+  }
+}
+```
+
+Inspect synchronization separately:
+
+```graphql
+query TracktIndexingStatus {
+  chain_metadata {
+    chain_id
+    block_height
+    latest_processed_block
+    num_events_processed
+    timestamp_caught_up_to_head_or_endblock
   }
 }
 ```

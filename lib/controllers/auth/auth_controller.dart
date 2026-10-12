@@ -11,6 +11,7 @@ import '../../services/run_storage_service.dart';
 import '../../services/user_notifications_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/daily_challenge_service.dart';
+import '../../services/monad_service.dart';
 
 class AuthController extends GetxController {
   final AuthService _authService = AuthService();
@@ -432,13 +433,12 @@ class AuthController extends GetxController {
         print('✅ Cleared notification service local storage on sign out');
       }
       
-      // 7. Clear all SharedPreferences data EXCEPT first-launch flag
+      // Preserve wallet credentials even if clearing user caches is interrupted.
       try {
         final prefs = await SharedPreferences.getInstance();
         final bool wasFirstLaunch = prefs.getBool('isFirstLaunch') ?? false;
-        await prefs.clear(); // Clears all stored preferences
-        await prefs.setBool('isFirstLaunch', wasFirstLaunch);
-        print('✅ SharedPreferences cleared (preserved isFirstLaunch=$wasFirstLaunch) on sign out');
+        await MonadService.clearUserPreferencesPreservingWallet(prefs);
+        print('✅ User preferences cleared; burner wallet and isFirstLaunch=$wasFirstLaunch preserved');
       } catch (e) {
         print('⚠️ Error clearing SharedPreferences: $e');
       }

@@ -13,6 +13,8 @@ chains:
     rpc:
       - url: https://testnet-rpc.monad.xyz
         for: sync
+        initial_block_interval: 100
+        interval_ceiling: 100
     contracts:
       - name: TerritoryRegistry
         address: "0x9ed60ace1e5288f010bd12b33a5d9d531f65bbb1"

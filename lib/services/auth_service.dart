@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/env_config.dart';
+import 'package:get/get.dart';
+import 'embedded_wallet_service.dart';
 
 class AuthService {
   // Forgot password (send reset email)
@@ -72,6 +74,9 @@ class AuthService {
 
   // Sign out
   Future<void> signOut() async {
+    if (Get.isRegistered<EmbeddedWalletService>()) {
+      await Get.find<EmbeddedWalletService>().disconnectOnSignOut();
+    }
     await Supabase.instance.client.auth.signOut();
     await GoogleSignIn().signOut();
   }

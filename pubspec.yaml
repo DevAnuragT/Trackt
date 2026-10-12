@@ -60,6 +60,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   uuid: ^4.5.1
   url_launcher: ^6.2.5
+  privy_flutter: ^0.11.0
   # flutter_local_notifications: ^19.4.0  # Temporarily disabled due to build issues
 
 dev_dependencies:
