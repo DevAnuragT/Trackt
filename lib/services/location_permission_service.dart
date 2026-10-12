@@ -387,10 +387,42 @@ class LocationPermissionService extends GetxService {
             ),
           ],
         ),
-        content: const Text(
-          'Set location to "Allow all the time" so runs keep tracking in the '
-          'background and no GPS is lost. We\'ll open settings for you.',
-          style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.35),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Keep runs tracking in the background so no GPS is lost. In '
+              'settings, under Location permission, choose:',
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.35),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFF6366F1)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Color(0xFF6366F1), size: 18),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Allow all the time',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         actionsPadding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
         actions: [
