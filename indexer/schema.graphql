@@ -1,0 +1,42 @@
+type Player {
+  id: ID!
+  address: String!
+  chainId: Int!
+  territoryCount: Int!
+  totalArea: BigInt!
+  claimCount: Int!
+  conquestCount: Int!
+  lastActivityAt: BigInt!
+}
+
+type Territory {
+  id: ID!
+  territoryId: BigInt!
+  chainId: Int!
+  owner: Player!
+  centerLat: BigInt!
+  centerLng: BigInt!
+  areaSqMeters: BigInt!
+  claimedAt: BigInt!
+  latestTxHash: String!
+}
+
+type Claim {
+  id: ID!
+  territoryId: BigInt!
+  owner: Player!
+  areaSqMeters: BigInt!
+  timestamp: BigInt!
+  blockNumber: Int!
+  txHash: String!
+}
+
+type Conquest {
+  id: ID!
+  territoryId: BigInt!
+  previousOwner: String!
+  conqueror: Player!
+  areaStolen: BigInt!
+  blockNumber: Int!
+  txHash: String!
+}

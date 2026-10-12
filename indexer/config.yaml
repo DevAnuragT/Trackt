@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+name: trackt
+description: On-chain territory ownership and runner leaderboard on Monad Testnet
+address_format: lowercase
+contracts:
+  - name: TerritoryRegistry
+    events:
+      - event: TerritoryClaimed(uint256 indexed territoryId, address indexed owner, int256 centerLat, int256 centerLng, uint256 areaSqMeters, uint256 timestamp)
+      - event: TerritoryConquered(uint256 indexed stolenTerritoryId, address indexed previousOwner, address indexed conqueror, uint256 areaStolen)
+chains:
+  - id: 10143
+    start_block: 70154932
+    rpc:
+      - url: https://testnet-rpc.monad.xyz
+        for: sync
+    contracts:
+      - name: TerritoryRegistry
+        address: "0x9ed60ace1e5288f010bd12b33a5d9d531f65bbb1"

@@ -90,7 +90,12 @@ app.*.map.json
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
+# Envio indexer dependencies and generated runtime
+indexer/node_modules/
+indexer/.envio/
+indexer/.pnpm-store/
+indexer/generated/
+
 # Local development scripts
 run_app.sh
 quick_run.sh
-
