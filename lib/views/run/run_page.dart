@@ -164,12 +164,16 @@ class _RunPageState extends State<RunPageAutoStart> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
+                Expanded(
+                  child: Row(
                   children: [
                     const Icon(Icons.bolt, color: Color(0xFF6366F1), size: 16),
                     const SizedBox(width: 6),
-                    Text(
+                    Expanded(
+                      child: Text(
                       'SIMULATING: ${preset.title}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -177,8 +181,11 @@ class _RunPageState extends State<RunPageAutoStart> {
                         letterSpacing: 0.3,
                       ),
                     ),
+                    ),
                   ],
                 ),
+                ),
+                const SizedBox(width: 8),
                 InkWell(
                   onTap: () => simService.stopSimulation(),
                   child: Container(
@@ -221,14 +228,19 @@ class _RunPageState extends State<RunPageAutoStart> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  simService.currentPhase.value,
-                  style: const TextStyle(
-                    color: Color(0xFF6366F1),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    simService.currentPhase.value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF6366F1),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '$progressPercent%',
                   style: const TextStyle(

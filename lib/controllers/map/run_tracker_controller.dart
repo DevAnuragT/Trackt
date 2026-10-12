@@ -429,7 +429,14 @@ class RunTrackerController extends GetxController {
     
     // Reset previous run data
     _resetTrackingData();
-    
+
+    // Make sure NO real GPS stream feeds this run — otherwise the device's
+    // actual location (e.g. Gwalior) gets mixed with the simulated waypoints
+    // (e.g. Central Park), producing an impossible cross-continent territory.
+    _stopLocationTracking();
+    _simOriginLat = initialPosition.latitude;
+    _simOriginLng = initialPosition.longitude;
+
     _runStartTime = DateTime.now();
     currentRunSession.value = RunSession(
       id: _uuid.v4(),
@@ -783,12 +790,27 @@ class RunTrackerController extends GetxController {
     });
   }
 
+  // Origin of the active simulated run, used to reject stray real-GPS points.
+  double? _simOriginLat;
+  double? _simOriginLng;
+
   void _onLocationUpdate(geo.Position position) {
     if (!isRunning.value) {
       print('⏸️ Not running, ignoring GPS update');
       return;
     }
-    
+
+    // During a simulated run, reject any point far from the simulated origin.
+    // This keeps the device's real location from contaminating the demo loop.
+    if (isSimulating.value && _simOriginLat != null && _simOriginLng != null) {
+      final d = geo.Geolocator.distanceBetween(
+        _simOriginLat!, _simOriginLng!, position.latitude, position.longitude);
+      if (d > 3000) {
+        print('🚫 Simulation: rejecting stray point ${(d / 1000).toStringAsFixed(1)}km from loop origin');
+        return;
+      }
+    }
+
     // Reset GPS restart counter on successful location update
     _gpsRestartCount = 0;
     _lastGpsUpdate = DateTime.now(); // Update last GPS timestamp
