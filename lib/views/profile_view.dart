@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../services/auth_service.dart';
 import '../services/user_preferences_service.dart';
+import '../services/power_up_service.dart';
 import '../services/database_service.dart';
 import '../services/territory_service.dart';
 
@@ -177,9 +178,22 @@ class _ProfileViewState extends State<ProfileView> {
 
 
 
+  /// Whether the user has unlocked custom territory colors by purchasing the
+  /// "Custom Flag" power-up in the Shop.
+  bool _hasCustomColorUnlock() {
+    try {
+      return Get.isRegistered<PowerUpService>() &&
+          Get.find<PowerUpService>().isActive('flag');
+    } catch (_) {
+      return false;
+    }
+  }
+
   void _showCustomColorPicker() {
     if (_prefs == null) return;
-    
+    // Guard again in case this is reached directly.
+    if (!_hasCustomColorUnlock()) return;
+
     Color tempColor = _prefs!.userColor.value; // Store temporary color
     
     showDialog(
@@ -611,25 +625,42 @@ class _ProfileViewState extends State<ProfileView> {
                         : null,
                   )),
                 )),
-                // Custom color option (last icon)
+                // Custom color option (premium — unlocked via the Shop's
+                // "Custom Flag / Banner" power-up for 500 $TRACKT).
                 GestureDetector(
-                  onTap: _showCustomColorPicker,
+                  onTap: () {
+                    if (_hasCustomColorUnlock()) {
+                      _showCustomColorPicker();
+                    } else {
+                      Get.snackbar(
+                        '🔒 Premium color',
+                        'Unlock custom territory colors with "Custom Flag" (500 \$TRACKT) in the Shop.',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: const Color(0xFF202024),
+                        colorText: Colors.white,
+                        duration: const Duration(seconds: 3),
+                      );
+                    }
+                  },
                   child: Obx(() {
+                    final unlocked = _hasCustomColorUnlock();
                     final isCustomColor = !_colorOptions.contains(_prefs!.userColor.value);
                     return Container(
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: isCustomColor ? _prefs!.userColor.value : Colors.grey[700],
+                        color: (unlocked && isCustomColor)
+                            ? _prefs!.userColor.value
+                            : Colors.grey[800],
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isCustomColor ? Colors.white : Colors.grey[600]!,
-                          width: isCustomColor ? 3 : 2,
+                          color: (unlocked && isCustomColor) ? Colors.white : Colors.grey[600]!,
+                          width: (unlocked && isCustomColor) ? 3 : 2,
                         ),
                       ),
                       child: Icon(
-                        Icons.palette,
-                        color: isCustomColor ? Colors.white : Colors.grey[400],
+                        unlocked ? Icons.palette : Icons.lock_outline,
+                        color: (unlocked && isCustomColor) ? Colors.white : Colors.grey[400],
                         size: 20,
                       ),
                     );
