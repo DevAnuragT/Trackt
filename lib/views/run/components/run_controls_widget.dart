@@ -33,8 +33,8 @@ class RunControlsWidget extends StatelessWidget {
   Widget _buildStartButton(RunTrackerController controller) {
     return Obx(() => CountdownStartButton(
       onPressed: controller.isStartingRun.value ? null : () => controller.startRun(),
-      backgroundColor: const Color(0xFF202024),
-      buttonColor: Colors.green,
+      backgroundColor: const Color(0xFF6366F1),
+      buttonColor: const Color(0xFF6366F1),
       textColor: Colors.white,
       isLoading: controller.isStartingRun.value,
       autoStart: autoStart,
@@ -53,69 +53,22 @@ class RunControlsWidget extends StatelessWidget {
   Widget _buildRunningControls(RunTrackerController controller) {
     return Row(
       children: [
-        // Pause button with circular design
         Expanded(
-          child: Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.orange[600],
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () => controller.pauseRun(),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.pause, color: Colors.white, size: 28),
-                    SizedBox(width: 8),
-                    Text(
-                      'Pause',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: _controlButton(
+            label: 'Pause',
+            icon: Icons.pause_rounded,
+            onTap: () => controller.pauseRun(),
+            filled: false,
           ),
         ),
-        const SizedBox(width: 16),
-        // Stop button with circular design
+        const SizedBox(width: 12),
         Expanded(
-          child: Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.red[600],
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () => _showStopConfirmation(controller),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.stop, color: Colors.white, size: 28),
-                    SizedBox(width: 8),
-                    Text(
-                      'Stop',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: _controlButton(
+            label: 'Stop',
+            icon: Icons.stop_rounded,
+            onTap: () => _showStopConfirmation(controller),
+            color: const Color(0xFFEF4444),
+            filled: true,
           ),
         ),
       ],
@@ -125,72 +78,68 @@ class RunControlsWidget extends StatelessWidget {
   Widget _buildPausedControls(RunTrackerController controller) {
     return Row(
       children: [
-        // Resume button with green solid color
         Expanded(
-          child: Container(
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.green[600],
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () => controller.resumeRun(),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.play_arrow, color: Colors.white, size: 28),
-                    SizedBox(width: 8),
-                    Text(
-                      'Resume',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: _controlButton(
+            label: 'Resume',
+            icon: Icons.play_arrow_rounded,
+            onTap: () => controller.resumeRun(),
+            color: const Color(0xFF6366F1),
+            filled: true,
           ),
         ),
-        const SizedBox(width: 16),
-        // Stop button
+        const SizedBox(width: 12),
         Expanded(
-          child: Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.red[600],
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () => _showStopConfirmation(controller),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.stop, color: Colors.white, size: 28),
-                    SizedBox(width: 8),
-                    Text(
-                      'Stop',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: _controlButton(
+            label: 'Stop',
+            icon: Icons.stop_rounded,
+            onTap: () => _showStopConfirmation(controller),
+            color: const Color(0xFFEF4444),
+            filled: true,
           ),
         ),
       ],
+    );
+  }
+
+  /// Flat, consistent run-control button matching the app's design system.
+  Widget _controlButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onTap,
+    Color color = const Color(0xFF6366F1),
+    bool filled = true,
+  }) {
+    final fg = filled ? Colors.white : const Color(0xFFFAFAFA);
+    return Material(
+      color: filled ? color : const Color(0xFF202024),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          height: 52,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: filled ? null : Border.all(color: const Color(0xFF2A2A2F)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: fg, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: fg,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -227,35 +176,33 @@ class RunControlsWidget extends StatelessWidget {
         // Territory Upload Status Display
         Obx(() => controller.isUploadingTerritory.value ? Container(
           width: double.infinity,
-          height: 60,
+          height: 52,
           decoration: BoxDecoration(
-            color: Colors.blue[500],
-            borderRadius: BorderRadius.circular(30),
+            color: const Color(0xFF202024),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFF2A2A2F)),
           ),
-          child: const Material(
-            color: Colors.transparent,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
                 ),
-                SizedBox(width: 12),
-                Text(
-                  'Uploading Territory...',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Uploading territory…',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ) : const SizedBox.shrink()),
       ],
@@ -266,8 +213,8 @@ class RunControlsWidget extends StatelessWidget {
     showDialog<bool>(
       context: Get.context!,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1F1F1F),
-        title: const Text('Stop Run', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF17171A),
+        title: const Text('Stop run?', style: TextStyle(color: Colors.white)),
         content: const Text(
           'Are you sure you want to stop this run?',
           style: TextStyle(color: Colors.white70),
@@ -278,7 +225,7 @@ class RunControlsWidget extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red[600]),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Stop', style: TextStyle(color: Colors.white)),
           ),
