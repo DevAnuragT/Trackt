@@ -29,7 +29,7 @@ class SimulationVictoryDialog extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -68,12 +68,12 @@ class SimulationVictoryDialog extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Trophy / Celebratory Icon
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 48,
+                  height: 48,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Color(0xFF202024),
@@ -82,32 +82,32 @@ class SimulationVictoryDialog extends StatelessWidget {
                     child: Icon(
                       Icons.emoji_events_outlined,
                       color: Color(0xFF6366F1),
-                      size: 34,
+                      size: 26,
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
 
                 // Title
                 const Text(
                   'Territory Conquered!',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.3,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   '${result.presetTitle} • ${result.city}',
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
 
                 // Metrics Grid
                 Row(
@@ -153,7 +153,7 @@ class SimulationVictoryDialog extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
 
                 // Monad Testnet Settlement Card
                 Container(
@@ -277,12 +277,12 @@ class SimulationVictoryDialog extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
 
                 // Action Buttons
                 SizedBox(
                   width: double.infinity,
-                  height: 46,
+                  height: 44,
                   child: ElevatedButton(
                     onPressed: () {
                       Get.back(); // Close modal
@@ -340,41 +340,37 @@ class SimulationVictoryDialog extends StatelessWidget {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFF202024),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.25),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 15),
+              Icon(icon, color: color, size: 13),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   label,
                   style: const TextStyle(
                     color: Colors.white60,
-                    fontSize: 11,
+                    fontSize: 10,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             value,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

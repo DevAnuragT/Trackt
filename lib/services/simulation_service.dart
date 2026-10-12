@@ -312,14 +312,17 @@ class SimulationService extends GetxService {
       }
       final simulatedTx = tx;
 
-      // Award $TRACKT for the simulated conquest, applying the Speed Multiplier
-      // power-up if active, so the shop economy loop is demonstrable end-to-end.
-      int coins = 100;
+      // Award $TRACKT for the simulated conquest — variable by distance/area,
+      // doubled while the Speed Multiplier power-up is active.
+      int coins = RunTrackerController.computeRunReward(
+        areaSqMeters: area,
+        distanceMeters: dist,
+      );
       try {
         if (Get.isRegistered<PowerUpService>()) {
-          coins = 100 * Get.find<PowerUpService>().rewardMultiplier;
+          coins *= Get.find<PowerUpService>().rewardMultiplier;
         }
-        if (Get.isRegistered<UserPreferencesService>()) {
+        if (coins > 0 && Get.isRegistered<UserPreferencesService>()) {
           await Get.find<UserPreferencesService>().addUserCoins(coins);
         }
       } catch (e) {

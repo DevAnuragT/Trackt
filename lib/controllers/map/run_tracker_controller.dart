@@ -1062,26 +1062,43 @@ class RunTrackerController extends GetxController {
     }
   }
 
-  /// Base $TRACKT reward for completing a run / conquering territory.
-  static const int baseRunReward = 100;
+  /// Minimum distance (meters) a run must cover to earn any $TRACKT reward.
+  static const double minRewardDistanceMeters = 100;
+
+  /// Variable $TRACKT reward for a completed run, scaled by distance covered
+  /// and area claimed, clamped to a sane range. Runs below
+  /// [minRewardDistanceMeters] (or with no area) earn nothing — a basic
+  /// anti-abuse floor so trivial runs don't mint tokens.
+  static int computeRunReward({
+    required double areaSqMeters,
+    required double distanceMeters,
+  }) {
+    if (distanceMeters < minRewardDistanceMeters || areaSqMeters <= 0) return 0;
+    final raw = distanceMeters / 5.0 + areaSqMeters / 2000.0;
+    return raw.round().clamp(25, 1000);
+  }
 
   /// Award $TRACKT for a completed run, applying the Speed Multiplier power-up
   /// if active. Skipped during simulation (SimulationService awards the sim
   /// payout so the victory dialog reflects the exact amount). Guarded and non-
   /// blocking so missing services never break run completion.
-  void _awardRunReward() {
+  void _awardRunReward(double areaSqMeters) {
     if (isSimulating.value) return;
     try {
+      final base = computeRunReward(
+        areaSqMeters: areaSqMeters,
+        distanceMeters: totalDistance.value,
+      );
       int mult = 1;
       if (Get.isRegistered<PowerUpService>()) {
         mult = Get.find<PowerUpService>().rewardMultiplier;
       }
-      final coins = baseRunReward * mult;
+      final coins = base * mult;
       lastRewardCoins.value = coins;
-      if (Get.isRegistered<UserPreferencesService>()) {
+      if (coins > 0 && Get.isRegistered<UserPreferencesService>()) {
         Get.find<UserPreferencesService>().addUserCoins(coins);
       }
-      print('💰 Awarded $coins \$TRACKT (x$mult) for completed run');
+      print('💰 Awarded $coins \$TRACKT (base $base x$mult) for completed run');
     } catch (e) {
       print('⚠️ Could not award run reward: $e');
     }
@@ -1104,7 +1121,7 @@ class RunTrackerController extends GetxController {
         simulatedMonadTx:
             lastMonadTxHash.value.isNotEmpty ? lastMonadTxHash.value : '0x—',
         completedAt: DateTime.now(),
-        coinsEarned: lastRewardCoins.value > 0 ? lastRewardCoins.value : baseRunReward,
+        coinsEarned: lastRewardCoins.value > 0 ? lastRewardCoins.value : 25,
         explorerUrl: _lastClaimExplorerUrl,
         settledOnChain: lastMonadTxOnChain.value,
       );
@@ -1256,7 +1273,7 @@ class RunTrackerController extends GetxController {
       // never blocks the UI or the local map update). Covers both real runs and
       // Judge simulation. Guarded so test environments without the service pass.
       _pendingClaimFuture = _dispatchMonadClaim(newTerritory);
-      _awardRunReward();
+      _awardRunReward(area);
 
       
       // Verify polygon closure
