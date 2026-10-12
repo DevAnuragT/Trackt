@@ -37,6 +37,12 @@ Deploy and wait until it catches up to the chain head. Copy the public GraphQL
 endpoint into the mobile app's local environment as `ENVIO_GRAPHQL_URL`.
 Do not put an Envio admin secret or deployment token in the mobile app.
 
+If the dashboard shows **0/3 deployments**, the indexer has been configured
+but no instance has been started. A new commit pushed to the configured
+branch triggers the first deployment; a push with "Everything up-to-date"
+does not. Open the resulting deployment to find its query/GraphQL endpoint
+and inspect build or indexing logs if it fails to start.
+
 Verify the endpoint returns real indexed runners:
 
 ```graphql
