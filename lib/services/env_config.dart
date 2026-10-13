@@ -72,5 +72,4 @@ class EnvConfig {
       _maybe('MONAD_RPC_PROVIDER') ?? 'public';
   static String get alchemyApiKey => _maybe('ALCHEMY_API_KEY') ?? '';
   static String get envioGraphqlUrl => _maybe('ENVIO_GRAPHQL_URL') ?? '';
-  static bool get aiRecapsEnabled => _maybe('AI_RECAPS_ENABLED') == 'true';
 }

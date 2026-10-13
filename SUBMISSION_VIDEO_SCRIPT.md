@@ -1,69 +1,103 @@
-# 🎬 Trackt — 2.5-Minute Demo Video Walkthrough Script
+# Trackt - Two-minute sponsor demo
 
-**Target:** Monad Metropolis Hackathon submission (Consumer Products & Payments / Social).
-**Runtime:** ~2 min 30 sec. **Format:** screen recording of the mobile app + voiceover, cut to a browser for the on-chain proof.
+**Targets:** Envio, Alchemy and Privy alongside the core Monad project.
+**Runtime:** at most 2:00, suitable for the optional video field on each
+sponsor form. A submission description is still required for each bounty.
 
-> Tip: record the Judge Simulation Mode run in **🎬 Demo (~14s)** speed so the loop closure reads clearly on camera.
+The supplied sponsor pages display October 14, 2026 at 09:29 GMT+5:30.
+Check the general project deadline separately.
 
----
+## Before recording
 
-## 0:00 – 0:25 — The Hook & The Problem
+- Install the latest APK as an update. Do not uninstall or clear wallet data.
+- Sign into the existing Trackt account and connect its Privy embedded wallet.
+  Enable Privy Email login and verify the OTP before the timed recording;
+  login alone is not the sponsor functionality.
+- Fund the selected Privy address with Monad Testnet MON.
+- Confirm Alchemy is the app's configured provider, and its dashboard records
+  app-driven balance/network/gas-estimation requests. Hide API keys.
+- Confirm Envio's historical indexer has caught up to the current chain.
+  Prepare the public GraphQL query and the on-chain standings screen.
+- Make one rehearsal claim, then verify its successful receipt and sender.
+  Do not record a local proof as a blockchain transaction.
 
-**On screen:** Cold open on the Trackt map (dark, Monad-purple UI) with rival territories already dotting the city.
+## 0:00-0:15 - Hook
 
-**Voiceover:**
-> "Fitness apps are lonely. You run, a line appears on a map, and… that's it. Trackt turns every run into a real-world territory war. Lace up, close a loop around a city block, and that land becomes *yours* — minted on-chain, defended against rivals, and worth something."
-
----
-
-## 0:25 – 0:50 — Why Monad?
-
-**On screen:** Slowly pan the map over the seeded rival territories (New York, San Francisco, London). Briefly show the wallet pill on the HUD.
-
-**Voiceover:**
-> "A territory game needs blockchain speed a runner won't notice. On most chains, 15-to-60-second blocks and dollar gas fees kill mobile gameplay. Monad gives us 10,000 TPS and sub-800-millisecond finality, so a territory claim settles for a fraction of a cent before you've taken your next stride. And with an on-device burner wallet, there are no MetaMask popups mid-run — Web3 goes invisible."
-
----
-
-## 0:50 – 1:40 — Live Mobile Demo
-
-**On screen:**
-1. Tap the **⚡ Judge Demo Lab** pill.
-2. Pick **Central Park, NYC** and **🎬 Demo** speed; tap launch.
-3. Watch the simulated runner trace an organic loop on Mapbox and close it.
-4. The territory fills in with the player's color beside the colored rivals.
+**Screen:** map, territory overlays and wallet pill; flat dark UI.
 
 **Voiceover:**
-> "Judges don't need running shoes. Trackt ships a one-tap simulator. I'll pick Central Park and send a runner. Watch the GPS trail curve into a closed loop — and the instant it closes, the enclosed land is claimed and painted onto the map, right next to rival runners' territory. Behind the scenes, an anti-cheat filter rejects any movement faster than a human can run, so this is Proof of Physical Movement, not GPS spoofing."
+> "Trackt turns running into territory conquest. Close a GPS loop, claim its
+> area, and compete through verifiable ownership on Monad."
 
----
+Label seeded rival polygons as demo content if they are shown. They are not
+real Envio leaderboard entries or proof of live multiplayer activity.
 
-## 1:40 – 2:15 — On-Chain Verification
+## 0:15-0:35 - Privy wallet functionality
 
-**On screen:**
-1. The victory dialog appears: area claimed, loop distance, **+100 $TRACKT**, and the Monad Testnet settlement card with the transaction hash.
-2. Tap **View on Monad Explorer** → cut to the browser showing the transaction on the Monad Testnet explorer.
-3. Cut to the **Shop** tab: spend $TRACKT on a **Speed Multiplier** or **Territory Shield**.
-
-**Voiceover:**
-> "The moment the loop closed, the claim was signed by the on-device wallet and broadcast to Monad Testnet. Here's the transaction on the explorer — real on-chain state, settled in well under a second. The run also paid out $TRACKT, our reward token, which I can spend right now in the shop: a Speed Multiplier to double my next payout, or a Territory Shield to lock my land against rivals for 24 hours."
-
----
-
-## 2:15 – 2:30 — Vision & Roadmap
-
-**On screen:** Return to the map, zoom out across the three seeded cities.
+**Screen:** wallet details showing Privy Embedded Wallet, address and funded
+MON balance. Briefly show relaunch persistence if captured in advance.
 
 **Voiceover:**
-> "This is day one. Next: Monad mainnet, guild-versus-guild territory wars, and sponsor-branded zones that turn real neighborhoods into contested ground. Trackt — run, claim, conquer. Powered by Monad."
+> "Privy does more than login. This embedded wallet belongs to my account and
+> signs the game's territory claims. My original burner is preserved, with
+> no automatic movement of funds."
 
----
+## 0:35-1:00 - Conquest
 
-## Shot checklist
-- [ ] Fresh install so the burner wallet is created on camera (optional, shows zero-friction onboarding).
-- [ ] Seeded rivals visible before the run (open on NYC / SF / London).
-- [ ] Loop closure + territory fill captured clearly.
-- [ ] Victory dialog tx hash readable; explorer page loads the real transaction.
-  - Requires contracts **deployed** and `MONAD_TERRITORY_CONTRACT` set — otherwise the hash is a local proof. Deploy first (see `contracts/README.md`).
-- [ ] Shop purchase shown changing the $TRACKT balance.
-- [ ] Keep total under 2:30.
+**Screen:** Judge Demo Lab, a preset circuit at Demo speed, closed loop and
+filled territory. The simulation is explicitly labeled.
+
+**Voiceover:**
+> "Desk-bound judges can test the same claim flow with a simulated run. The
+> runner closes a loop, the app calculates the territory, and the selected
+> Privy wallet submits the registry call."
+
+Do not describe simulated GPS as a real physical run. Client-side speed
+filtering is not cryptographic proof that movement cannot be spoofed.
+
+## 1:00-1:20 - Confirmed on-chain result
+
+**Screen:** victory broadcast hash -> explorer receipt. Highlight success,
+TerritoryRegistry target and sender matching the Privy address.
+
+**Voiceover:**
+> "Here is the successful Monad receipt from that Privy address to our deployed
+> TerritoryRegistry. The app distinguishes a broadcast from an unverified
+> local proof; the explorer confirms the actual state change."
+
+Do not claim a measured finality time that has not been recorded. The local
+shop coin balance and contract ERC-20 balance are distinct; do not conflate them.
+
+## 1:20-1:45 - Envio data flowing into the app
+
+**Screen:** hosted GraphQL entry for this transaction -> refresh On-chain
+standings -> matching runner/count/area.
+
+**Voiceover:**
+> "Envio HyperIndex consumes the claim and conquest events. It derives current
+> ownership and each runner's total area and territory count. These live
+> standings come from the indexer, not from seeded map rivals or local proofs."
+
+Wait for actual indexing. If the pipeline is delayed, show the elapsed time
+or disclose an edit; never present an older transaction as the new claim.
+
+## 1:45-2:00 - Alchemy and close
+
+**Screen:** Alchemy request activity for the app's balance/network/gas reads,
+then return to the map.
+
+**Voiceover:**
+> "Alchemy supplies Monad balance reads, network validation and gas estimation.
+> Privy signs and broadcasts its wallet transaction, while Envio powers the
+> standings. Run, claim, conquer."
+
+Show meaningful app-driven requests rather than just an installed SDK or an
+API key. Do not attribute Privy's broadcast to Alchemy without verifying that
+provider route.
+
+## Evidence gate
+
+Only call the recording complete when it shows a successful Privy-sent
+receipt, meaningful Alchemy activity and the matching indexed claim driving
+the frontend. Missing credits, mocked tests or portal bounty selection are
+not evidence of live functionality. No AI sponsor functionality is claimed.

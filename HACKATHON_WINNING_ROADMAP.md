@@ -8,6 +8,12 @@
 - **Secondary:** *Social, Attention, and Culture* (Clubs, community coordination, geo-territory conquest)  
 **Target Network:** Monad Testnet (Chain ID: `143`)
 
+> **October 13 update:** the supplied Envio, Alchemy and Privy portal pages
+> display a sponsor deadline of **October 14, 2026 at 09:29 GMT+5:30**.
+> The timeline below is the original plan, not authoritative portal timing.
+> Current Monad Testnet chain ID is **10143**. Sponsor evidence requirements
+> and current gaps are documented in README; KIMI is no longer targeted.
+
 ---
 
 ## 1. The Core Narrative: "Why Monad?" (Pitch Thesis)

@@ -76,7 +76,10 @@ Simulation bypasses auth and network so it works on a fresh install with no acco
 
 ## 🚀 Hackathon Roadmap & Progress
 
-For our day-by-day action plan leading to the October 13 deadline, see [HACKATHON_WINNING_ROADMAP.md](HACKATHON_WINNING_ROADMAP.md).
+For our action plan, see [HACKATHON_WINNING_ROADMAP.md](HACKATHON_WINNING_ROADMAP.md).
+The supplied Envio, Alchemy and Privy portal pages display a bounty deadline of
+**October 14, 2026 at 09:29 GMT+5:30**. Confirm the overall project deadline in
+the submission portal rather than relying on the older roadmap dates.
 
 ---
 
@@ -125,16 +128,6 @@ with root directory `indexer` and config file `config.yaml`. It indexes real
 Monad territory claims and conquests; authorizing the GitHub App alone does
 not deploy it.
 
-The [secure KIMI proxy](supabase/README.md) uses Supabase user authentication
-and a server-side secret. Apply its isolated quota migration before live use.
-Never package KIMI credentials or Supabase deployment/service-role keys in
-Flutter assets. The mobile victory dialog requests recaps asynchronously from
-this proxy, without delaying conquest results. AI is optional and disabled by
-default because listing KIMI models does not establish available API credit.
-After verifying usable API credit, set `AI_RECAPS_ENABLED=true` locally to
-enable it. Authentication, quota and provider failures are shown as errors,
-never presented as generated messages.
-
 Configure public mobile settings in `.env.dev` and rebuild/restart:
 
 ```env
@@ -143,7 +136,6 @@ PRIVY_CLIENT_ID=your_public_mobile_client_id
 ENVIO_GRAPHQL_URL=https://your-public-indexer-endpoint
 MONAD_RPC_PROVIDER=alchemy
 ALCHEMY_API_KEY=your_restricted_rpc_key
-AI_RECAPS_ENABLED=false
 ```
 
 Use `MONAD_RPC_PROVIDER=public` to retain the configured public RPC. Enable
@@ -163,9 +155,60 @@ proofs. Missing configuration, an unavailable indexer, and an empty indexed
 chain have distinct states. A broadcast hash is not labeled confirmed;
 check its receipt on the explorer.
 
-Server-only local credentials are preserved in ignored `.env.server.local`
-(mode `0600`), outside all Flutter assets. For deployment use Supabase secrets;
-do not copy this local file into `pubspec.yaml` or the APK.
+Never put deployment tokens or service-role credentials into Flutter assets.
+The retired AI integration is not part of Trackt or its submission; retained
+database migration history is documented in [supabase/README.md](supabase/README.md).
+
+### Bounty requirements and evidence
+
+The requirements below come from the sponsor portal screenshots supplied on
+October 13, 2026. Meeting technical requirements is not a guarantee of a prize.
+All three bounties are track-agnostic and request a written description of the
+integration; each form also offers an optional demo video of up to two minutes.
+
+| Bounty | Prize shown | Required functionality | Current evidence and remaining work |
+| --- | --- | --- | --- |
+| Envio | $1,000 USD, one prize | HyperIndex, HyperSync or HyperRPC must drive a useful feature with real on-chain data; deployed pipeline, public source and consuming frontend/API; short end-to-end demo or live link | HyperIndex indexes claims/conquests into `Player`, `Territory`, `Claim` and `Conquest` entities; Flutter consumes its leaderboard. The live query returns two real players, with ownership/area aggregates checked against indexed territories and claim events checked against successful Monad receipts. Historical sync is still in progress. Record a new claim reaching the app before calling the demo complete. |
+| Alchemy | $1,000 in Alchemy credits, one prize (not cash) | A functional Monad project meaningfully using at least one supported Alchemy service/tool | Alchemy RPC is the configured development provider and returns chain `10143`. The app uses it for MON/token balances, network validation and Privy claim gas estimation; burner transactions also use this RPC. Capture app-driven request activity and a successful claim. Privy's provider broadcasts Privy-signed transactions; do not attribute that broadcast to Alchemy without verifying its route. |
+| Privy | $5,000 USD, one prize | Functionality beyond login/authentication, clearly demonstrated | Privy creates/restores the embedded EVM wallet and signs/sends the registry claim through its native provider. Account-bound persistence, exact calldata, wallet switching and wrong-chain protection are tested. A real OTP login plus a funded claim from the Privy address still needs on-device verification. Login/OTP alone does not qualify. |
+
+Envio judges value depth of use, correct live data, originality and readable
+code/schema. Our derived ownership/area aggregates and conquest history are
+relevant; multichain support is an example of extra depth, not a requirement.
+Alchemy judges integration quality, technical execution and usefulness.
+Privy awards bonus consideration for multiple meaningful features, but does
+not require adding unrelated features merely to increase a feature count.
+
+**Draft submission descriptions (verify the demo evidence before submitting):**
+
+- **Envio:** "Trackt uses Envio HyperIndex to turn Monad territory claim and
+  conquest events into current ownership records, runner area/count aggregates
+  and an auditable claim/conquest history. Its Flutter on-chain standings query
+  the deployed GraphQL API and rank runners by currently owned area. The handlers
+  remove a conquered territory from the previous owner's totals and avoid
+  double-counting the accompanying claim event; local demo proofs and seeded
+  rivals never enter these standings."
+- **Alchemy:** "Trackt uses Alchemy's Monad Testnet JSON-RPC for live native and
+  reward-token balances, network validation and gas estimation for territory
+  claims. The client checks the RPC chain before signing. Its supported burner
+  path also broadcasts registry calls through Alchemy; embedded-wallet claims
+  use Privy's provider for signing/broadcast and Alchemy for reads/estimation."
+- **Privy:** "Trackt uses Privy beyond authentication: runners create or restore
+  a non-custodial embedded EVM wallet and use its native provider to sign and
+  send `claimTerritory` calls on Monad Testnet. The selected wallet persists for
+  the Trackt account, drives displayed balances and is never silently replaced
+  by a burner when its session is unverified. The existing burner and funds
+  remain intact; a funded on-device claim demonstrates the wallet functionality."
+
+Confirmed indexed claim examples (these establish Envio data correctness, not
+that the original sender used Privy or Alchemy):
+
+- [`0xd3ff7652921c4aaf0e9fcecb084622b269a71f3daae267190bffe5db7db1aa6d`](https://testnet.monadexplorer.com/tx/0xd3ff7652921c4aaf0e9fcecb084622b269a71f3daae267190bffe5db7db1aa6d)
+- [`0xa62998f9c0ede05fd7534fb1fc793aa521b7b3945e04061440a13ab0240439d3`](https://testnet.monadexplorer.com/tx/0xa62998f9c0ede05fd7534fb1fc793aa521b7b3945e04061440a13ab0240439d3)
+
+See [SUBMISSION_VIDEO_SCRIPT.md](SUBMISSION_VIDEO_SCRIPT.md) for an end-to-end
+two-minute recording plan and [TESTING_NOTES.md](TESTING_NOTES.md) for live
+verification steps. No AI sponsor integration is claimed.
 
 > **Deployed on Monad Testnet (Chain ID `10143`):**
 > - `TerritoryRegistry`: [`0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1`](https://testnet.monadexplorer.com/address/0x9ed60acE1E5288F010bD12b33a5D9d531f65bBb1)

@@ -6,6 +6,46 @@ Autonomous session log. Each feature below was implemented, unit/widget-tested, 
 
 ---
 
+## Current sponsor evidence checklist - October 13, 2026
+
+This section supersedes older settlement/UI descriptions below. Use the new
+APK as an update; do not uninstall or reset preferences to test onboarding.
+Touched UI uses the shared flat neutral/indigo theme, not old neon/glow styles.
+
+- [ ] **Privy beyond login:** use your existing Trackt account; wallet pill ->
+  Connect Privy wallet -> send/verify the email OTP. Confirm the title reads
+  Privy Embedded Wallet and copy the selected address. OTP itself requires no
+  MON, but it is not sufficient for the bounty.
+- [ ] **Funded Privy claim:** send Testnet MON to that address, run a Judge
+  simulation, and open the broadcast hash on the explorer. Verify receipt
+  status is success, target is TerritoryRegistry and sender is the selected
+  Privy address. A local proof cannot substitute for this.
+- [ ] **Wallet persistence:** relaunch and confirm the same Privy address;
+  explicitly choose the preserved burner and check its address/funds remain.
+  An unverified Privy session must not silently sign with the burner.
+- [ ] **Alchemy:** with `MONAD_RPC_PROVIDER=alchemy`, refresh MON and token
+  balances and run the funded claim. Capture corresponding app activity in
+  Alchemy's dashboard without exposing the API key. Alchemy supplies reads,
+  network validation and Privy gas estimation; Privy's provider handles its
+  own transaction signing/broadcast.
+- [ ] **Envio:** confirm historical indexing has caught up, then record a new
+  claim arriving through the hosted GraphQL API and in wallet pill -> On-chain
+  standings after refresh. Show the runner's territory count and owned area.
+  Current live evidence already contains two real indexed claims/players
+  whose events and aggregates were verified against Monad receipts.
+- [ ] **Victory UI:** metrics and actions are scrollable on a small screen;
+  there is no AI recap/loading/error card. A local proof is labeled unverified
+  and has no explorer link; a broadcast is not called receipt-confirmed.
+- [ ] **Submission:** use README's sponsor descriptions, attach public
+  repository/deployed contract details and record the two-minute walkthrough.
+  Submit only observed behavior; do not claim test mocks or seeded rivals
+  are live indexed activity.
+
+Automated removal baseline: **69 Flutter tests**, four Envio handler tests,
+zero analyzer compile errors (the existing lint backlog is unchanged).
+
+---
+
 ## P0 — MonadService (done earlier, committed `24b895e`)
 - [ ] Launch app on device/emulator. Confirm no boot crash from `MonadService().init()`.
 - [ ] Check logs for `⛓️ MonadService ready. Wallet: 0x…` — wallet address generated once, same on relaunch (persisted).
@@ -93,7 +133,6 @@ Global theme + per-screen Monad palette. Visual only — verify on device.
 - [ ] Live run stats card uses cyan/amber/purple metrics (not blue/green/orange).
 - [ ] No leftover bright-blue Material accents on primary surfaces (swapped to Monad purple/cyan). Semantic red (stop) / green (go) on run controls intentionally kept.
 - [ ] Nothing clipped or overflowing at phone width after the spacing/compactness changes.
-
 
 
 

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../services/simulation_service.dart';
-import 'ai_recap_card.dart';
 
 class SimulationVictoryDialog extends StatelessWidget {
   final SimulationResult result;
@@ -322,8 +321,6 @@ class SimulationVictoryDialog extends StatelessWidget {
                 const SizedBox(height: 14),
 
                 // Action Buttons
-                AiRecapCard(result: result),
-                const SizedBox(height: 14),
                 SizedBox(
                   width: double.infinity,
                   height: 44,

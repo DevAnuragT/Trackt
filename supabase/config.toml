@@ -1,4 +1,1 @@
 project_id = "trackt"
-
-[functions.conquest-ai]
-verify_jwt = true

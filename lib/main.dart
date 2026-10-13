@@ -21,7 +21,6 @@ import 'services/samsung_permission_helper.dart';
 import 'services/simulation_service.dart';
 import 'services/monad_service.dart';
 import 'services/power_up_service.dart';
-import 'services/ai_service.dart';
 import 'services/embedded_wallet_service.dart';
 import 'services/on_chain_leaderboard_service.dart';
 
@@ -81,14 +80,6 @@ Future<void> main() async {
       ).init(),
     );
     await Get.putAsync(() => MonadService(embeddedWallet: embeddedWallet).init());
-    Get.put(AiService(
-      projectUrl: supaUrl ?? '',
-      anonKey: supaKey ?? '',
-      accessToken: () => supabaseConfigured
-          ? Supabase.instance.client.auth.currentSession?.accessToken
-          : null,
-      enabled: EnvConfig.aiRecapsEnabled,
-    ));
     Get.put(OnChainLeaderboardService(endpoint: EnvConfig.envioGraphqlUrl));
     Get.put(RunTrackerController());
     Get.put(SimulationService(), permanent: true);

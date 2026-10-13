@@ -225,24 +225,17 @@ errors, and 1,011 existing lint/info/warning findings.
   and four real-handler tests pass. Deploy it in Envio Cloud with root
   `indexer`, branch `monad`, and config `config.yaml`. The user deployed it and
   saved its public GraphQL endpoint; the actual leaderboard query returns
-  HTTP 200 with a valid empty player array. Indexer metadata shows historical
+  HTTP 200 with two real players and two claim records. Ownership/area totals
+  agree with the indexed territories; both claim events match confirmed
+  Monad receipts fetched through Alchemy. Indexer metadata shows historical
   sync in progress, not yet caught up to head.
   See [indexer/README.md](indexer/README.md).
-- **KIMI:** Supabase CLI access and server-side `KIMI_API_KEY` are verified.
-  The key's model listing includes `kimi-k2.6`, not the old
-  `moonshot-v1-8k`; the server model is set to `kimi-k2.6`.
-  A real completion check returns HTTP 429: the KIMI account is suspended
-  for insufficient balance. The user must add API credit or resolve billing;
-  model-list access alone does not mean generation works.
-  The authenticated `conquest-ai` function is deployed.
-  The user has applied the migration in the existing project's SQL Editor.
-  The live table is verified and an isolated authenticated call confirms that
-  user authentication and quota enforcement work. Its temporary test user was
-  removed. KIMI credits are still unavailable, so AI is intentionally off by
-  default (`AI_RECAPS_ENABLED=false`) and the core demo stays functional.
-  See [supabase/README.md](supabase/README.md). Prior uncommitted mobile AI
-  changes have been completed: the victory dialog now loads real recaps
-  asynchronously through the protected proxy, never with a bundled KIMI key.
+- **AI removal (October 13):** KIMI has been removed from the mobile client,
+  victory UI, tests and deployable backend source. The deployed recap function
+  was deleted (HTTP 404 verified), and its server secrets/local settings were
+  removed. It is not a target bounty or a claimed feature. Previously applied
+  isolated quota migration/table history remains inert; no runtime calls it.
+  Do not reintroduce paid AI dependencies or deployment steps for submission.
 - **Privy:** the SDK, email OTP UI, wallet restoration, source selection,
   account-bound signing and burner preservation are implemented and tested.
   App ID and the mobile Client ID are now saved locally. The mobile client
@@ -258,12 +251,13 @@ errors, and 1,011 existing lint/info/warning findings.
   chain 10143, and the development app selects it explicitly using
   `MONAD_RPC_PROVIDER=alchemy`. The public RPC remains an explicit option.
 
-Current Flutter suite: **76 tests pass**. Envio has four handler tests; the
-proxy has 12 HTTP tests and one real-PostgreSQL quota test. The Android debug
+After AI removal, the Flutter suite has **69 passing tests** and Envio has
+four handler tests; a retained small-screen victory test covers the cleaned UI.
+The Android debug
 APK builds successfully; its contents were checked for server secrets.
 Native build fixes include excluding duplicated OSGi manifest metadata and
 restoring Flutter's standard Gradle build output directory.
-Touched wallet, victory, AI and leaderboard UI uses the shared `AppColors`
+Touched wallet, victory and leaderboard UI uses the shared `AppColors`
 palette with flat controls, neutral borders and no glow/gradient decorations.
 The release APK (arm64, about 93 MB) also builds and launches on a fresh
 headless Android test device without crash markers. Both debug and release
@@ -275,3 +269,28 @@ to avoid repeated oversized requests and retry backoff.
 The connected Android device was no longer available by the end of this
 setup check. Real wallet login, funding and live claims still need device
 verification; configuration alone does not establish bounty eligibility.
+
+## 11. Sponsor submission criteria - October 13, 2026
+
+The supplied official portal pages list **October 14, 2026 at 09:29
+GMT+5:30** for Envio, Alchemy and Privy. This supersedes the older dates for
+these sponsor bounties; verify the overall project deadline separately.
+
+- **Envio:** $1,000 USD, one prize. A deployed Envio pipeline, public
+  configuration/schema/handlers, useful data-consuming app and short demo or
+  live link are required. Non-trivial derived aggregates are relevant to the
+  depth criterion. The live leaderboard is verified, but fresh claim-to-app
+  footage and completed historical sync are still outstanding.
+- **Alchemy:** $1,000 in Alchemy credits, not cash. At least one meaningful
+  supported service/tool in a functional Monad project is sufficient; no
+  wallet replacement or extra sponsor features are mandatory. Demonstrate
+  the actual RPC reads/network checks/gas estimation. Privy broadcasting
+  must not be mislabeled as an Alchemy broadcast.
+- **Privy:** $5,000 USD, one prize. Login-only is explicitly ineligible.
+  Embedded-wallet creation/restoration and a funded registry transaction are
+  our beyond-authentication functionality; capture it from the Privy address.
+  Multiple meaningful Privy features are a bonus, not a mandatory checklist.
+
+All three forms request an integration description and offer an optional
+video of up to two minutes. Draft descriptions and verified receipt links
+are in README; the video and device evidence are not marked complete.
