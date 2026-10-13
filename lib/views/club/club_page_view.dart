@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
-import '../../models/club/user_club_model.dart';
+
+import '../../core/theme/app_colors.dart';
 import '../../models/club/club_member_model.dart';
+import '../../models/club/user_club_model.dart';
 import '../../services/club_service.dart';
+import 'components/club_widgets.dart';
 
 class ClubPageView extends StatefulWidget {
   final String? clubId;
   final UserClub? club;
-  
+
   const ClubPageView({super.key, this.clubId, this.club});
-  
-  // Constructor for when we have clubId (from join club)
-  const ClubPageView.fromClubId({super.key, required this.clubId}) : club = null;
-  
-  // Constructor for when we have club object (from club list)
+  const ClubPageView.fromClubId({super.key, required this.clubId})
+    : club = null;
   const ClubPageView.fromClub({super.key, required this.club}) : clubId = null;
 
   @override
@@ -22,507 +21,362 @@ class ClubPageView extends StatefulWidget {
 }
 
 class _ClubPageViewState extends State<ClubPageView> {
-  late ClubService _clubService;
+  late final ClubService _clubService;
+  UserClub? _club;
   List<ClubMember> _members = [];
-  bool _isLoading = true;
-  UserClub? _clubData;
+  bool _loading = true;
+  bool _leaving = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _clubService = Get.find<ClubService>();
-    _initializeClubData();
+    _clubService = Get.isRegistered<ClubService>()
+        ? Get.find<ClubService>()
+        : Get.put(ClubService());
+    _club = widget.club;
+    _loadClub(refreshDetails: _club == null);
   }
 
-  Future<void> _initializeClubData() async {
-    if (widget.club != null) {
-      _clubData = widget.club;
-      await _loadClubMembers();
-    } else if (widget.clubId != null) {
-      // We need to get the club data first
-      await _loadClubData();
-    }
-  }
-
-  Future<void> _loadClubData() async {
-    try {
-      await _clubService.refreshClubData();
-      final userClubs = _clubService.userClubs;
-      _clubData = userClubs.firstWhere((club) => club.clubId == widget.clubId);
-      await _loadClubMembers();
-    } catch (e) {
-      print('Error loading club data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load club data',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
-  }
-
-  Future<void> _loadClubMembers() async {
-    if (_clubData == null) return;
-    
+  Future<void> _loadClub({bool refreshDetails = true}) async {
     setState(() {
-      _isLoading = true;
+      _loading = true;
+      _error = null;
     });
-
     try {
-      final members = await _clubService.getClubMembers(_clubData!.clubId);
-      if (mounted) {
-        setState(() {
-          _members = members;
-          _isLoading = false;
-        });
+      final id = _club?.clubId ?? widget.clubId;
+      if (id == null) throw StateError('No club was selected.');
+      if (refreshDetails) {
+        await _clubService.refreshClubData();
+        if (_clubService.userClubsError.value != null) {
+          throw StateError(_clubService.userClubsError.value!);
+        }
+        final club = _clubService.getClubById(id);
+        if (club == null) {
+          throw StateError('This club is no longer in your memberships.');
+        }
+        if (!mounted) return;
+        _club = club;
       }
-    } catch (e) {
-      print('Error loading club members: $e');
+      final members = await _clubService.getClubMembers(id);
+      if (!mounted) return;
+      setState(() => _members = members);
+    } catch (error) {
+      debugPrint('Could not load club details: $error');
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        Get.snackbar(
-          'Error',
-          'Failed to load club members',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        setState(
+          () => _error =
+              'Check your connection and try again. '
+              'If you left this club, return to your clubs list.',
         );
       }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _leaveClub() async {
+    final club = _club;
+    if (club == null || _leaving) return;
+    final founder = _clubService.isCurrentUserFounder(club);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Leave this club?', style: clubHeadingStyle),
+        content: Text(
+          founder
+              ? 'Ownership will transfer to the earliest joined member. '
+                    'If you are the only member, the club will be deleted.'
+              : 'You will leave ${club.clubName}. Keep the invite code if you want to rejoin.',
+          style: clubBodyStyle,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              foregroundColor: AppColors.onAccent,
+              elevation: 0,
+            ),
+            child: const Text('Leave club'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _leaving = true);
+    try {
+      final left = await _clubService.leaveClub(club.clubId);
+      if (!left) {
+        throw StateError('The server did not confirm that you left the club.');
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('You left ${club.clubName}')));
+      Navigator.of(context).pop();
+    } catch (error) {
+      debugPrint('Could not leave club: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not leave the club. Please try again.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _leaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_clubData == null) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF0F0F11),
-        appBar: AppBar(
-          title: const Text('Loading...'),
-          backgroundColor: const Color(0xFF0F0F11),
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
+    final club = _club;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F11),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(_clubData!.clubName),
-        backgroundColor: const Color(0xFF0F0F11),
-        foregroundColor: Colors.white,
+        title: const Text('Club overview'),
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0,
         actions: [
-          // Leave Club (founder can also leave; ownership will transfer)
-          PopupMenuButton<String>(
-              color: Colors.grey[900],
-              onSelected: (value) async {
-                if (value == 'leave') {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: const Color(0xFF0F0F11),
-                      title: const Text('Leave Club', style: TextStyle(color: Colors.white)),
-                      content: Text(
-                        _clubService.isCurrentUserFounder(_clubData!)
-                            ? 'You are the founder. If other members exist, ownership will transfer to the earliest joined member; if not, the club will be deleted. Continue?'
-                            : 'Are you sure you want to leave "${_clubData!.clubName}"? You may need the referral code to rejoin.',
-                        style: TextStyle(color: Colors.grey[300]),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel',style: TextStyle(color: Colors.white),),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red[600]),
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text(
-                            'Leave',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirm == true) {
-                    try {
-                      // Optional local spinner via snackbar
-                      Get.snackbar(
-                        'Leaving',
-                        'Processing your request...',
-                        backgroundColor: Colors.grey[800],
-                        colorText: Colors.white,
-                        duration: const Duration(seconds: 1),
-                      );
-                      // Capture context before leaving
-                      final bool wasFounder = _clubService.isCurrentUserFounder(_clubData!);
-                      final int memberCountAtLeave = _members.length; // includes self
-
-                      await _clubService.leaveClub(_clubData!.clubId);
-
-                      String message;
-                      if (wasFounder) {
-                        // If only founder was present, club is deleted; otherwise ownership transfers
-                        message = memberCountAtLeave <= 1
-                            ? 'Club deleted. You have left ${_clubData!.clubName}'
-                            : 'Ownership transferred. You have left ${_clubData!.clubName}';
-                      } else {
-                        message = 'You have left ${_clubData!.clubName}';
-                      }
-
-                      Get.snackbar(
-                        'Left Club',
-                        message,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                        duration: const Duration(seconds: 2),
-                      );
-                      if (mounted) Navigator.of(context).maybePop();
-                    } catch (e) {
-                      Get.snackbar(
-                        'Error',
-                        e.toString(),
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                        duration: const Duration(seconds: 3),
-                      );
-                    }
-                  }
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem<String>(
+          if (club != null)
+            PopupMenuButton<String>(
+              enabled: !_leaving,
+              tooltip: 'Club options',
+              color: AppColors.surface,
+              icon: const Icon(Icons.more_horiz),
+              onSelected: (_) => _leaveClub(),
+              itemBuilder: (_) => [
+                const PopupMenuItem(
                   value: 'leave',
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Leave Club', style: TextStyle(color: Colors.white)),
-                    ],
+                  child: Text(
+                    'Leave club',
+                    style: TextStyle(color: AppColors.danger),
                   ),
                 ),
               ],
             ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Club Info Card
-            Card(
-              color: Colors.grey[850],
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          onRefresh: _loadClub,
+          color: AppColors.accent,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                sliver: SliverList.list(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.group,
-                          color: Colors.blue[400],
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _clubData!.clubName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                    if (club != null) ...[
+                      _buildOverview(club),
+                      const SizedBox(height: 16),
+                      ClubPanel(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Invite members',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
                               ),
-                              const SizedBox(height: 4),
-                              // Creator info
-                              Text(
-                                'Created by ${_clubData!.creatorDisplayName ?? 'Unknown User'}',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              // Referral Code below creator (tap to copy)
-                              InkWell(
-                                onTap: () async {
-                                  await Clipboard.setData(ClipboardData(text: _clubData!.referralCode));
-                                },
-                                borderRadius: BorderRadius.circular(6),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.copy,
-                                      color: Colors.green[400],
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _clubData!.referralCode,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'monospace',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Share this code to invite another runner.',
+                              style: clubBodyStyle,
+                            ),
+                            const SizedBox(height: 14),
+                            ClubInviteCode(code: club.referralCode),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text('Members', style: clubHeadingStyle),
+                          ),
+                          if (!_loading && _error == null)
+                            ClubBadge(label: '${_members.length}'),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Your club roster and membership details.',
+                        style: clubBodyStyle,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    if (_leaving) ...[
+                      const LinearProgressIndicator(color: AppColors.accent),
+                      const SizedBox(height: 16),
+                    ],
+                    if (_loading)
+                      const Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.accent,
                           ),
                         ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Member Count
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.people,
-                          color: Colors.orange[400],
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Members: ${_members.length}',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // Created Date
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: Colors.purple[400],
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Created: ${_formatDate(_clubData!.clubCreatedAt)}',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // Joined Date
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.login,
-                          color: Colors.cyan[400],
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Joined: ${_formatDate(_clubData!.joinedAt)}',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                      )
+                    else if (_error != null)
+                      ClubMessage(
+                        title: club == null
+                            ? 'Club unavailable'
+                            : 'Could not load members',
+                        message: _error!,
+                        onRetry: _loadClub,
+                      )
+                    else if (_members.isEmpty)
+                      const ClubMessage(
+                        title: 'No members to show',
+                        message: 'Pull down to refresh the member list.',
+                      ),
                   ],
                 ),
               ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Members Section Header
-            Row(
-              children: [
-                Icon(
-                  Icons.people_outline,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Club Members',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              if (!_loading && _error == null && club != null)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  sliver: SliverList.builder(
+                    itemCount: _members.length,
+                    itemBuilder: (_, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _buildMember(_members[index], club),
+                    ),
                   ),
                 ),
-              ],
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Members List
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                      ),
-                    )
-                  : _members.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.people_outline,
-                                size: 64,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No Members',
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _members.length,
-                          itemBuilder: (context, index) {
-                            final member = _members[index];
-                            return _buildMemberCard(member, index + 1);
-                          },
-                        ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildMemberCard(ClubMember member, int position) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 5),
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: position == 1 
-              ? Colors.amber[600]!.withOpacity(0.5)
-              : Colors.grey[700]!,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          children: [
-            // Position Badge
-            Container(
-              width: 35,
-              height: 35,
-              decoration: BoxDecoration(
-                color: position == 1 
-                    ? Colors.amber[600]
-                    : Colors.blue[600],
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Center(
-                child: Text(
-                  position.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+  Widget _buildOverview(UserClub club) {
+    return ClubPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClubAvatar(name: club.clubName, size: 52),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(club.clubName, style: clubHeadingStyle),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Created by ${club.creatorDisplayName ?? 'a club member'}',
+                      style: clubBodyStyle,
+                    ),
+                    if (_clubService.isCurrentUserFounder(club)) ...[
+                      const SizedBox(height: 8),
+                      const ClubBadge(label: 'Your club'),
+                    ],
+                  ],
                 ),
               ),
-            ),
-            
-            const SizedBox(width: 12),
-            
-            // Member Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    member.displayName ?? member.userEmail ?? 'Unknown User',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Divider(height: 1, color: AppColors.border),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 28,
+            runSpacing: 16,
+            children: [
+              _stat(
+                'Members',
+                '${_error == null && !_loading ? _members.length : club.memberCount}',
+              ),
+              _stat('Created', formatClubDate(club.clubCreatedAt)),
+              _stat('You joined', formatClubDate(club.joinedAt)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(String label, String value) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(label, style: clubBodyStyle),
+      const SizedBox(height: 4),
+      Text(
+        value,
+        style: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildMember(ClubMember member, UserClub club) {
+    final name = member.displayName?.trim().isNotEmpty == true
+        ? member.displayName!
+        : member.userEmail ?? 'Club member';
+    final founder = member.userId == club.creatorId;
+    final you = member.userId == _clubService.currentUserId;
+    return ClubPanel(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClubAvatar(name: name, size: 40),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Joined ${formatClubDate(member.joinedAt)}',
+                  style: clubBodyStyle,
+                ),
+                if (founder || you) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
                     children: [
-                      Icon(
-                        Icons.calendar_today,
-                        color: Colors.grey[500],
-                        size: 14,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Joined ${_formatDate(member.joinedAt)}',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 13,
-                        ),
-                      ),
+                      if (founder) const ClubBadge(label: 'Founder'),
+                      if (you) const ClubBadge(label: 'You'),
                     ],
                   ),
                 ],
-              ),
+              ],
             ),
-            
-            // Role Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: position == 1 
-                    ? Colors.amber[600]
-                    : Colors.grey[600],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                position == 1 ? 'Founder' : 'Member',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 }

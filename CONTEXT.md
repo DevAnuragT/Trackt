@@ -294,3 +294,25 @@ these sponsor bounties; verify the overall project deadline separately.
 All three forms request an integration description and offer an optional
 video of up to two minutes. Draft descriptions and verified receipt links
 are in README; the video and device evidence are not marked complete.
+
+## 12. Professional club UI - October 13, 2026
+
+The clubs list and inside-club overview now use Trackt's shared flat
+neutral/indigo palette, compact initial avatars, clear typography and
+consistent panels/buttons. The create/join forms follow the same design.
+All four screens scroll correctly on small displays, large text and keyboards.
+
+Club behavior is preserved with tightly related corrections: one initial
+membership load instead of duplicate requests, refresh after returning from
+club/form routes, invite-code copying with confirmation, actual creator-ID
+Founder badges instead of fake list-position ranks, matching-code join
+navigation, and error/retry states instead of fabricated empty rosters.
+Leave confirmation remains available and a server-rejected leave never
+dismisses the club or claims success. Async completions check mounted state.
+
+Validation: **89 Flutter tests pass**, including **20 club-specific widget and
+service tests**. Club UI/new tests analyze cleanly; full analysis has zero
+compile errors and 1,000 existing findings. The rebuilt arm64 release was
+installed as an update on the connected phone. The real clubs list and
+member roster were inspected with no app crash or overflow markers, and
+no clubs or memberships were created/deleted during device validation.

@@ -44,6 +44,26 @@ Touched UI uses the shared flat neutral/indigo theme, not old neon/glow styles.
 Automated removal baseline: **69 Flutter tests**, four Envio handler tests,
 zero analyzer compile errors (the existing lint backlog is unchanged).
 
+## Club UI update - October 13, 2026
+
+The clubs list, club overview and create/join forms now share the neutral dark
+`AppColors` theme, a single indigo action color, flat panels and consistent
+spacing/type. Member entries are a roster, not a ranked leaderboard; Founder
+is determined by the club's creator ID rather than the first row.
+
+- [ ] Open Club: check compact cards, create/join controls and copyable invite
+  codes. Pull down to refresh; return from a club/form to refresh memberships.
+- [ ] Open a club: check the overview dates/member count, invite panel and
+  roster. Confirm the Founder badge belongs to the actual creator.
+- [ ] Create/join: check the keyboard does not hide the submit button.
+  Name validation remains 3-50 characters; invite codes remain 8 characters
+  and case-insensitive. Joining should open the matching club, not the last
+  item in the returned list.
+- [ ] Leave: Cancel must preserve membership. Confirmed leave returns to the
+  updated list; server failure must not dismiss the club or claim success.
+- [ ] Small screen/large text: all content scrolls, labels wrap and controls
+  remain usable. Load failures show retry, not a fabricated empty roster.
+
 ---
 
 ## P0 — MonadService (done earlier, committed `24b895e`)
@@ -133,7 +153,6 @@ Global theme + per-screen Monad palette. Visual only — verify on device.
 - [ ] Live run stats card uses cyan/amber/purple metrics (not blue/green/orange).
 - [ ] No leftover bright-blue Material accents on primary surfaces (swapped to Monad purple/cyan). Semantic red (stop) / green (go) on run controls intentionally kept.
 - [ ] Nothing clipped or overflowing at phone width after the spacing/compactness changes.
-
 
 
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../core/theme/app_colors.dart';
 import '../../services/club_service.dart';
-import '../club/club_page_view.dart'; // Added import for ClubPageView
+import 'club_page_view.dart';
+import 'components/club_widgets.dart';
 
 class CreateClubView extends StatefulWidget {
   const CreateClubView({super.key});
@@ -14,7 +17,8 @@ class _CreateClubViewState extends State<CreateClubView> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final ClubService _clubService = Get.find<ClubService>();
-  bool _isCreating = false;
+  bool _creating = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -23,237 +27,113 @@ class _CreateClubViewState extends State<CreateClubView> {
   }
 
   Future<void> _createClub() async {
-    if (!_formKey.currentState!.validate()) return;
-
+    if (_creating || !_formKey.currentState!.validate()) return;
     setState(() {
-      _isCreating = true;
+      _creating = true;
+      _error = null;
     });
-
     try {
-      final clubId = await _clubService.createClub(_nameController.text.trim());
-      
-      if (clubId != null) {
-        Get.snackbar(
-          'Success',
-          'Club created successfully!',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
-        
-        // Refresh club data first
-        await Get.find<ClubService>().refreshClubData();
-        
-        // Get the newly created club
-        final newClub = Get.find<ClubService>().getClubById(clubId);
-        
-        if (newClub != null) {
-          // Navigate to the club page removing current page from stack
-          Get.off(() => ClubPageView.fromClub(club: newClub));
-        } else {
-          // Fallback: go back to clubs view
-          Get.back();
-        }
+      final id = await _clubService.createClub(_nameController.text.trim());
+      if (id == null || id.isEmpty) {
+        throw StateError('The server did not return a created club.');
       }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to create club: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
+      if (!mounted) return;
+      final club = _clubService.getClubById(id);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => club == null
+              ? ClubPageView.fromClubId(clubId: id)
+              : ClubPageView.fromClub(club: club),
+        ),
       );
+    } catch (error) {
+      debugPrint('Could not create club: $error');
+      if (mounted) {
+        setState(
+          () => _error =
+              'Could not create your club. Check your connection and try again.',
+        );
+      }
     } finally {
-      setState(() {
-        _isCreating = false;
-      });
+      if (mounted) setState(() => _creating = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F0F11),
-      appBar: AppBar(
-        title: const Text('Create Club'),
-        backgroundColor: const Color(0xFF0F0F11),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 32),
-              
-              // Icon
-              Icon(
-                Icons.add_circle_outline,
-                size: 80,
-                color: Colors.blue[400],
+    return ClubFormLayout(
+      title: 'Create club',
+      description:
+          'Bring your running crew together. Choose a name, then invite '
+          "members with your club's unique code.",
+      form: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Club name',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Title
-              Text(
-                'Create a New Club',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _nameController,
+              enabled: !_creating,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _createClub(),
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
               ),
-              
+              decoration: const InputDecoration(
+                hintText: 'e.g. Riverside Run Club',
+                filled: true,
+                fillColor: AppColors.surfaceVariant,
+              ),
+              validator: (value) {
+                final name = value?.trim() ?? '';
+                if (name.isEmpty) return 'Enter a club name';
+                if (name.length < 3) return 'Use at least 3 characters';
+                if (name.length > 50) return 'Use no more than 50 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '3-50 characters. Your invite code is generated automatically.',
+              style: clubBodyStyle,
+            ),
+            if (_error != null) ...[
               const SizedBox(height: 16),
-              
               Text(
-                'Start a club and invite others to join using the referral code',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Club Name Input
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  controller: _nameController,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: 'Club Name',
-                    labelStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 16,
-                    ),
-                    hintText: 'Enter club name',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 16,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.edit,
-                      color: Colors.blue[400],
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey[600]!),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey[600]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.blue[400]!, width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[850],
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a club name';
-                    }
-                    if (value.trim().length < 3) {
-                      return 'Club name must be at least 3 characters';
-                    }
-                    if (value.trim().length > 50) {
-                      return 'Club name must be less than 50 characters';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Create Button
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isCreating ? null : _createClub,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[600],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _isCreating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text(
-                          'Create Club',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Info Text
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue[900]!.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue[700]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.blue[400],
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'A unique referral code will be automatically generated for your club',
-                        style: TextStyle(
-                          color: Colors.blue[200],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                _error!,
+                style: const TextStyle(color: AppColors.danger, fontSize: 13),
               ),
             ],
-          ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _creating ? null : _createClub,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: AppColors.onAccent,
+                elevation: 0,
+                minimumSize: const Size(0, 48),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(_creating ? 'Creating club...' : 'Create club'),
+            ),
+          ],
         ),
       ),
     );
