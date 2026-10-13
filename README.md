@@ -170,7 +170,7 @@ integration; each form also offers an optional demo video of up to two minutes.
 | --- | --- | --- | --- |
 | Envio | $1,000 USD, one prize | HyperIndex, HyperSync or HyperRPC must drive a useful feature with real on-chain data; deployed pipeline, public source and consuming frontend/API; short end-to-end demo or live link | HyperIndex indexes claims/conquests into `Player`, `Territory`, `Claim` and `Conquest` entities; Flutter consumes its leaderboard. The live query returns two real players, with ownership/area aggregates checked against indexed territories and claim events checked against successful Monad receipts. Historical sync is still in progress. Record a new claim reaching the app before calling the demo complete. |
 | Alchemy | $1,000 in Alchemy credits, one prize (not cash) | A functional Monad project meaningfully using at least one supported Alchemy service/tool | Alchemy RPC is the configured development provider and returns chain `10143`. The app uses it for MON/token balances, network validation and Privy claim gas estimation; burner transactions also use this RPC. Capture app-driven request activity and a successful claim. Privy's provider broadcasts Privy-signed transactions; do not attribute that broadcast to Alchemy without verifying its route. |
-| Privy | $5,000 USD, one prize | Functionality beyond login/authentication, clearly demonstrated | Privy creates/restores the embedded EVM wallet and signs/sends the registry claim through its native provider. Account-bound persistence, exact calldata, wallet switching and wrong-chain protection are tested. A real OTP login plus a funded claim from the Privy address still needs on-device verification. Login/OTP alone does not qualify. |
+| Privy | $5,000 USD, one prize | Functionality beyond login/authentication, clearly demonstrated | Privy creates/restores the embedded EVM wallet and signs/sends registry calls. A funded claim was recorded on the real phone and its successful receipt, Privy sender and matching territory event independently verified through Alchemy at block `70607206`. The captioned `build/demo/trackt-privy-demo.mp4` is under two minutes; fresh-claim Envio indexing is still pending and labeled accordingly. |
 
 Envio judges value depth of use, correct live data, originality and readable
 code/schema. Our derived ownership/area aggregates and conquest history are
@@ -205,6 +205,15 @@ that the original sender used Privy or Alchemy):
 
 - [`0xd3ff7652921c4aaf0e9fcecb084622b269a71f3daae267190bffe5db7db1aa6d`](https://testnet.monadexplorer.com/tx/0xd3ff7652921c4aaf0e9fcecb084622b269a71f3daae267190bffe5db7db1aa6d)
 - [`0xa62998f9c0ede05fd7534fb1fc793aa521b7b3945e04061440a13ab0240439d3`](https://testnet.monadexplorer.com/tx/0xa62998f9c0ede05fd7534fb1fc793aa521b7b3945e04061440a13ab0240439d3)
+
+**Confirmed funded Privy claim, October 13:** transaction
+[`0x6ae6d7b3497c35943f7103f8140b58e7ec71d07e342987b9e1982b2df5f1104d`](https://testnet.monadexplorer.com/tx/0x6ae6d7b3497c35943f7103f8140b58e7ec71d07e342987b9e1982b2df5f1104d)
+at block `70607206`, from the connected Privy address
+`0xa0e1F726D2f01f7e325418E05ac4C5820990c71c` to TerritoryRegistry.
+Its successful receipt and claim event agree on the owner and `25463` square
+meters; the wallet received `100` on-chain TRACKT. No burner fallback was used.
+The exact new hash was not yet returned by Envio during this check, so that
+transaction is not presented as fresh indexed proof in the video.
 
 See [SUBMISSION_VIDEO_SCRIPT.md](SUBMISSION_VIDEO_SCRIPT.md) for an end-to-end
 two-minute recording plan and [TESTING_NOTES.md](TESTING_NOTES.md) for live

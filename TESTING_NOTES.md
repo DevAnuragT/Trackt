@@ -102,6 +102,27 @@ to **94 passing tests**. The corrected release APK was rebuilt and installed
 without uninstalling or clearing data. Privy is left selected for the funded
 follow-up; the burner remains preserved.
 
+### Funded Privy proof - later on October 13
+
+The user funded the connected Privy address with 5 Testnet MON. A new Judge
+Demo run was recorded with that wallet selected, without using the burner.
+Alchemy independently verified successful transaction
+[`0x6ae6d7b3497c35943f7103f8140b58e7ec71d07e342987b9e1982b2df5f1104d`](https://testnet.monadexplorer.com/tx/0x6ae6d7b3497c35943f7103f8140b58e7ec71d07e342987b9e1982b2df5f1104d)
+at block **70607206**. Actual sender is the Privy address; target is the
+deployed TerritoryRegistry; the event owner matches and its area is
+**25,463 square meters**.
+
+Post-claim Privy balance: **4.969141838 MON** and **100 on-chain TRACKT**.
+Wallet refresh and clean sheet/standings navigation worked on the phone,
+with no app crash/overflow/controller-init markers.
+
+`build/demo/trackt-privy-demo.mp4` is the updated **under-two-minute**, silent,
+captioned video showing the actual funded wallet, simulation, successful
+claim and verified receipt, refreshed balances, and existing indexed data.
+It supersedes the earlier burner-only rehearsal for Privy proof. The exact
+new Privy hash is still waiting for Envio backfill; older standings are
+explicitly labeled rather than passed off as this transaction.
+
 ---
 <!-- APPEND-NEW-FEATURES-BELOW -->
 
@@ -184,8 +205,6 @@ Global theme + per-screen Monad palette. Visual only — verify on device.
 - [ ] Live run stats card uses cyan/amber/purple metrics (not blue/green/orange).
 - [ ] No leftover bright-blue Material accents on primary surfaces (swapped to Monad purple/cyan). Semantic red (stop) / green (go) on run controls intentionally kept.
 - [ ] Nothing clipped or overflowing at phone width after the spacing/compactness changes.
-
-
 
 
 

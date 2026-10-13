@@ -341,3 +341,20 @@ Current test suite: **94 passing tests**, including five new regressions.
 captioned phone rehearsal. It explicitly labels burner use, simulated GPS,
 older indexed data and the missing Privy/new-claim Envio proof. It is not
 advertised as a completed sponsor submission video.
+
+## 14. Funded Privy transaction verified - October 13, 2026
+
+After the user added 5 Testnet MON, the connected Privy wallet completed a
+real registry claim on the phone. Confirmed successful transaction:
+`0x6ae6d7b3497c35943f7103f8140b58e7ec71d07e342987b9e1982b2df5f1104d`,
+block **70607206**, actual sender
+`0xa0e1f726d2f01f7e325418e05ac4c5820990c71c`, deployed registry target,
+matching event owner and **25,463 m2**. Alchemy independently verified the
+receipt; the actual Privy balance became **100 TRACKT** and **4.969141838 MON**.
+No burner fallback or additional wallet-to-wallet transfer was performed.
+
+The updated `build/demo/trackt-privy-demo.mp4` is **under two minutes**, silent with
+captions, and demonstrates the funded gameplay transaction beyond login.
+This resolves the earlier Privy funding/proof gap. Envio's exact-hash query
+still did not contain this new transaction during verification; the video
+labels the older real standings and pending backfill honestly.
