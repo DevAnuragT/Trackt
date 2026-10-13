@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,8 @@ import '../../../controllers/auth/auth_controller.dart';
 import '../../../services/on_chain_leaderboard_service.dart';
 import '../../on_chain_leaderboard_page.dart';
 import 'embedded_wallet_sheet.dart';
+
+enum _WalletAction { connect, standings, receive }
 
 /// Compact wallet HUD using the app's shared flat theme.
 /// Tapping opens a details sheet with the full address, balances, and links.
@@ -70,9 +74,16 @@ class MonadWalletPill extends StatelessWidget {
     );
   }
 
-  void _showWalletSheet(BuildContext context, MonadService monad) {
-    Get.bottomSheet(
-      SingleChildScrollView(
+  Future<void> _showWalletSheet(
+    BuildContext context,
+    MonadService monad,
+  ) async {
+    unawaited(monad.refreshBalances());
+    final action = await showModalBottomSheet<_WalletAction>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: const BoxDecoration(
@@ -88,17 +99,21 @@ class MonadWalletPill extends StatelessWidget {
                   const Icon(Icons.bolt, color: AppColors.accent, size: 18),
                   const SizedBox(width: 6),
                   Expanded(
-                    child: Text(
-                      monad.usesEmbeddedWallet
-                          ? 'Privy Embedded Wallet'
-                          : 'Monad Session Wallet',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    child: Obx(
+                      () => Text(
+                        monad.walletAddress.value.isEmpty
+                            ? 'Wallet unavailable'
+                            : monad.usesEmbeddedWallet
+                            ? 'Privy Embedded Wallet'
+                            : 'Monad Session Wallet',
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
@@ -117,6 +132,15 @@ class MonadWalletPill extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Refresh balances',
+                    onPressed: () => monad.refreshBalances(),
+                    icon: const Icon(
+                      Icons.refresh,
+                      size: 18,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -147,7 +171,9 @@ class MonadWalletPill extends StatelessWidget {
                     child: SizedBox(
                       height: 44,
                       child: ElevatedButton.icon(
-                        onPressed: () => _showReceiveSheet(monad),
+                        onPressed: () => Navigator.of(
+                          sheetContext,
+                        ).pop(_WalletAction.receive),
                         icon: const Icon(Icons.qr_code_2, size: 18),
                         label: const Text('Add MON'),
                       ),
@@ -200,7 +226,9 @@ class MonadWalletPill extends StatelessWidget {
                       final service = monad.embeddedWallet!;
                       if (service.isSelected.value) {
                         await service.useBurner();
-                        Get.back();
+                        if (sheetContext.mounted) {
+                          Navigator.of(sheetContext).pop();
+                        }
                       } else if (!service.isConfigured) {
                         Get.snackbar(
                           'Privy setup needed',
@@ -208,21 +236,7 @@ class MonadWalletPill extends StatelessWidget {
                           snackPosition: SnackPosition.BOTTOM,
                         );
                       } else {
-                        final email = Get.isRegistered<AuthController>()
-                            ? Get.find<AuthController>().user?.email
-                            : null;
-                        if (email == null || email.isEmpty) {
-                          Get.snackbar(
-                            'Sign in first',
-                            'Sign in to Trackt before connecting Privy.',
-                          );
-                          return;
-                        }
-                        Get.back();
-                        Get.bottomSheet(
-                          EmbeddedWalletSheet(service: service, email: email),
-                          isScrollControlled: true,
-                        );
+                        Navigator.of(sheetContext).pop(_WalletAction.connect);
                       }
                     },
                     child: Text(
@@ -240,14 +254,8 @@ class MonadWalletPill extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: () {
-                      Get.back();
-                      Get.to(
-                        () => OnChainLeaderboardPage(
-                          service: Get.find<OnChainLeaderboardService>(),
-                        ),
-                      );
-                    },
+                    onPressed: () =>
+                        Navigator.of(sheetContext).pop(_WalletAction.standings),
                     child: const Text('On-chain standings'),
                   ),
                 ),
@@ -261,8 +269,40 @@ class MonadWalletPill extends StatelessWidget {
           ),
         ),
       ),
-      isScrollControlled: true,
     );
+    if (!context.mounted) return;
+    switch (action) {
+      case _WalletAction.connect:
+        final email = Get.isRegistered<AuthController>()
+            ? Get.find<AuthController>().user?.email
+            : null;
+        if (email == null || email.isEmpty) {
+          Get.snackbar(
+            'Sign in first',
+            'Sign in to Trackt before connecting Privy.',
+          );
+          return;
+        }
+        await showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (_) =>
+              EmbeddedWalletSheet(service: monad.embeddedWallet!, email: email),
+        );
+      case _WalletAction.standings:
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => OnChainLeaderboardPage(
+              service: Get.find<OnChainLeaderboardService>(),
+            ),
+          ),
+        );
+      case _WalletAction.receive:
+        _showReceiveSheet(monad);
+      case null:
+        break;
+    }
   }
 
   Widget _row(String label, String value, {bool copyable = false}) {

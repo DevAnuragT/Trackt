@@ -71,6 +71,37 @@ is determined by the club's creator ID rather than the first row.
 - [ ] Check logs for `⛓️ MonadService ready. Wallet: 0x…` — wallet address generated once, same on relaunch (persisted).
 - [ ] Complete a Judge Sim run → logs show `⛓️ Monad territory claim settled: 0x…` (local proof until contracts deployed).
 
+## Live phone testing and rehearsal - October 13, 2026
+
+- Privy OTP dispatch succeeded. The connected embedded wallet is
+  `0xa0e1F726D2f01f7e325418E05ac4C5820990c71c`; the session and source selection
+  survived the update. It has **zero Testnet MON**. No funds were transferred
+  from the preserved burner without authorization, and no successful Privy
+  transaction is claimed.
+- One explicitly burner-backed Judge Demo run completed on the real phone.
+  Alchemy independently confirmed successful transaction
+  [`0x43d33d544a37b923460be8c13f22d3ec7eca7ee8c7d4e267c1aed0cb820d5e75`](https://testnet.monadexplorer.com/tx/0x43d33d544a37b923460be8c13f22d3ec7eca7ee8c7d4e267c1aed0cb820d5e75)
+  at block **70602621**, from the preserved burner to TerritoryRegistry.
+  The burner's actual ERC-20 balance increased from 100 to 200. The victory
+  dialog's variable in-game reward is separate from that ERC-20 mint.
+- Live testing exposed stale wallet balances after broadcasting, plus
+  overlapping wallet/connect/standings sheets. Balance refresh now follows a
+  successful receipt, with a manual refresh button and explicit reverted/
+  unavailable receipt errors. Modal navigation closes the correct route
+  before opening another. Both fixes were rechecked on the phone.
+- The exact new transaction hash was not yet in Envio at the recording check;
+  existing real indexed standings remained available. Do not pass off those
+  older entries as this new claim.
+- Generated `build/demo/trackt-demo-rehearsal.mp4`: **97 seconds**, 720x1600
+  H.264 at 30fps, silent with readable captions. The recording and phone
+  snapshots are labeled, including the burner source, pending indexing and
+  incomplete Privy proof. It is a rehearsal, not a finished sponsor demo.
+
+Five additional receipt/navigation regressions bring the full Flutter suite
+to **94 passing tests**. The corrected release APK was rebuilt and installed
+without uninstalling or clearing data. Privy is left selected for the funded
+follow-up; the burner remains preserved.
+
 ---
 <!-- APPEND-NEW-FEATURES-BELOW -->
 
@@ -153,7 +184,6 @@ Global theme + per-screen Monad palette. Visual only — verify on device.
 - [ ] Live run stats card uses cyan/amber/purple metrics (not blue/green/orange).
 - [ ] No leftover bright-blue Material accents on primary surfaces (swapped to Monad purple/cyan). Semantic red (stop) / green (go) on run controls intentionally kept.
 - [ ] Nothing clipped or overflowing at phone width after the spacing/compactness changes.
-
 
 
 

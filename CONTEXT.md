@@ -316,3 +316,28 @@ compile errors and 1,000 existing findings. The rebuilt arm64 release was
 installed as an update on the connected phone. The real clubs list and
 member roster were inspected with no app crash or overflow markers, and
 no clubs or memberships were created/deleted during device validation.
+
+## 13. Connected-phone proof and demo rehearsal - October 13, 2026
+
+One burner-backed Judge Demo claim was filmed and its successful receipt
+verified through Alchemy: transaction
+`0x43d33d544a37b923460be8c13f22d3ec7eca7ee8c7d4e267c1aed0cb820d5e75`,
+block **70602621**, preserved burner sender and TerritoryRegistry target.
+The actual wallet token balance increased from 100 to 200. That new hash
+was still pending in Envio during the recording check.
+
+Privy OTP dispatch works, a session is connected, and the selected wallet is
+`0xa0e1F726D2f01f7e325418E05ac4C5820990c71c`, but it has no Testnet MON.
+No unauthorized wallet-to-wallet funding was performed. A funded Privy
+transaction is still an external proof gap, not a completed test.
+
+Actual phone testing found/fixed stale balances after broadcast and overlapping
+wallet navigation. Receipts now trigger balance refresh; manual refresh and
+explicit confirmation errors are available. Wallet-to-connect/standings
+navigation uses the correct modal route and was physically rechecked.
+Current test suite: **94 passing tests**, including five new regressions.
+
+`build/demo/trackt-demo-rehearsal.mp4` is a validated **97-second**, silent,
+captioned phone rehearsal. It explicitly labels burner use, simulated GPS,
+older indexed data and the missing Privy/new-claim Envio proof. It is not
+advertised as a completed sponsor submission video.

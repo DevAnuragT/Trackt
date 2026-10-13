@@ -78,6 +78,7 @@ class MonadService extends GetxService {
 
   Web3Client? _client;
   http.Client? _httpClient;
+  bool _closed = false;
   EthPrivateKey? _credentials;
   EthereumAddress? _address;
 
@@ -318,7 +319,7 @@ class MonadService extends GetxService {
           lastTxOnChain.value = true;
           // ignore: avoid_print
           print('✅ Territory claim broadcast to Monad: $txHash');
-          unawaited(refreshBalances());
+          unawaited(_refreshAfterReceipt(client, txHash));
           return txHash;
         } catch (e) {
           lastClaimError.value = usesEmbeddedWallet
@@ -359,12 +360,49 @@ class MonadService extends GetxService {
     return buf.toString();
   }
 
+  Future<void> _refreshAfterReceipt(Web3Client client, String txHash) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 45));
+    while (!_closed && DateTime.now().isBefore(deadline)) {
+      try {
+        final receipt = await client
+            .getTransactionReceipt(txHash)
+            .timeout(const Duration(seconds: 8));
+        if (_closed) return;
+        if (receipt != null) {
+          if (receipt.status == true) {
+            await refreshBalances();
+          } else if (lastTxHash.value == txHash) {
+            lastClaimError.value =
+                'The on-chain claim reverted. Check its receipt on Explorer.';
+            debugPrint('Monad: ${lastClaimError.value}');
+          }
+          return;
+        }
+      } catch (error) {
+        if (_closed) return;
+        if (lastTxHash.value == txHash) {
+          lastClaimError.value =
+              'Could not verify the receipt. Check Explorer or refresh balances.';
+        }
+        debugPrint('Monad receipt check failed (${error.runtimeType}).');
+        return;
+      }
+      await Future<void>.delayed(const Duration(seconds: 2));
+    }
+    if (!_closed && lastTxHash.value == txHash) {
+      lastClaimError.value =
+          'Receipt confirmation is taking longer than expected. Check Explorer.';
+      debugPrint('Monad: ${lastClaimError.value}');
+    }
+  }
+
   /// Monad Testnet explorer link for a transaction hash.
   String explorerTxUrl(String txHash) =>
       'https://testnet.monadexplorer.com/tx/$txHash';
 
   @override
   void onClose() {
+    _closed = true;
     _walletWorker?.dispose();
     _client?.dispose();
     _httpClient?.close();

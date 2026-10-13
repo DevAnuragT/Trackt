@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:privy_flutter/privy_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -42,10 +41,10 @@ class _EmbeddedWalletSheetState extends State<EmbeddedWalletSheet> {
     try {
       if (_sent) {
         await widget.service.verifyEmailCode(widget.email, _code.text);
-        if (mounted) Get.back();
+        if (mounted) Navigator.of(context).pop();
       } else if (widget.service.hasSession) {
         await widget.service.activateExistingSession();
-        if (mounted) Get.back();
+        if (mounted) Navigator.of(context).pop();
       } else {
         await widget.service.sendEmailCode(widget.email);
         if (mounted) setState(() => _sent = true);
