@@ -4,6 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'database_service.dart';
 
 class UserPreferencesService extends GetxService {
+  final DatabaseService? _providedDatabase;
+
+  UserPreferencesService({DatabaseService? database}) : _providedDatabase = database;
   static const String _usernameKey = 'username';
   static const String _userColorKey = 'userColor';
   static const String _isFirstLaunchKey = 'isFirstLaunch';
@@ -19,7 +22,7 @@ class UserPreferencesService extends GetxService {
 
   Future<UserPreferencesService> init() async {
     _prefs = await SharedPreferences.getInstance();
-    _databaseService = DatabaseService(); // Initialize database service
+    _databaseService = _providedDatabase ?? DatabaseService();
     await _loadPreferences();
     return this;
   }
@@ -107,6 +110,7 @@ class UserPreferencesService extends GetxService {
       if (_databaseService.isAuthenticated) {
         final profile = await _databaseService.getUserProfile();
         print('🔍 Force refresh profile response: $profile');
+        if (profile == null) throw StateError('Profile could not be refreshed');
         
         if (profile != null) {
           // Load color
@@ -139,6 +143,7 @@ class UserPreferencesService extends GetxService {
       }
     } catch (e) {
       print('❌ Force refresh failed: $e');
+      rethrow;
     }
   }
 
@@ -160,19 +165,11 @@ class UserPreferencesService extends GetxService {
   }
 
   Future<void> setUsername(String name) async {
+    if (_databaseService.isAuthenticated) {
+      await _databaseService.updateUserDisplayName(name);
+    }
     await _prefs.setString(_usernameKey, name);
     username.value = name;
-    
-    // Sync with Supabase if user is authenticated
-    try {
-      if (_databaseService.isAuthenticated) {
-        await _databaseService.updateUserDisplayName(name);
-        print('✅ Username synced to Supabase: $name');
-      }
-    } catch (e) {
-      print('⚠️ Failed to sync username to Supabase: $e');
-      // Continue with local storage even if cloud sync fails
-    }
   }
 
   Future<void> setUserColor(Color color) async {
@@ -202,12 +199,18 @@ class UserPreferencesService extends GetxService {
         await _databaseService.updateUserCoins(coins);
         print('✅ Coins synced to Supabase: $coins');
       }
+
     } catch (e) {
       print('⚠️ Failed to sync coins to Supabase: $e');
       // Continue with local storage even if cloud sync fails
     }
   }
   
+  Future<void> applyServerCoins(int coins) async {
+    userCoins.value = coins;
+    await _prefs.setInt(_userCoinsKey, coins);
+  }
+
   Future<void> addUserCoins(int coinsToAdd) async {
     final newTotal = userCoins.value + coinsToAdd;
     await setUserCoins(newTotal);

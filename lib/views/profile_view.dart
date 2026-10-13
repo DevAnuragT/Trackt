@@ -1,811 +1,643 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../services/auth_service.dart';
-import '../services/user_preferences_service.dart';
-import '../services/power_up_service.dart';
-import '../services/database_service.dart';
-import '../services/territory_service.dart';
 
+import '../controllers/auth/auth_controller.dart';
 import '../controllers/map/run_tracker_controller.dart';
-import '../views/profile/run_history_page.dart';
-import '../views/profile/user_stats_page.dart';
+import '../core/theme/app_colors.dart';
+import '../services/auth_service.dart';
+import '../services/database_service.dart';
+import '../services/power_up_service.dart';
+import '../services/territory_service.dart';
+import '../services/user_preferences_service.dart';
 import 'profile/notifications_page.dart';
+import 'profile/run_history_page.dart';
+import 'profile/user_stats_page.dart';
 import 'store/store_view.dart';
-// import '../routes/app_routes.dart';
-// import '../controllers/auth/auth_controller.dart';
 
 class ProfileView extends StatefulWidget {
-  const ProfileView({super.key});
+  final UserPreferencesService? preferences;
+  final User? Function()? currentUser;
+
+  const ProfileView({super.key, this.preferences, this.currentUser});
 
   @override
   State<ProfileView> createState() => _ProfileViewState();
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  final TextEditingController _nameController = TextEditingController();
+  final _name = TextEditingController();
   UserPreferencesService? _prefs;
-  bool _isInitialized = false;
-  bool _isNameDirty = false;
-  bool _isSavingName = false;
-  // Removed Add Password feature from Profile view
-  
-  // Predefined color options (aligned with setup page)
-  final List<Color> _colorOptions = [
-    const Color(0xFF2196F3), // Blue
-    const Color(0xFF4CAF50), // Green
-    const Color(0xFFFF9800), // Orange
-    const Color(0xFFE91E63), // Pink
-    const Color(0xFF9C27B0), // Purple
-    const Color(0xFFF44336), // Red
-    const Color(0xFF00BCD4), // Cyan
-    const Color(0xFFFFEB3B), // Yellow
+  bool _ready = false;
+  bool _dirty = false;
+  bool _saving = false;
+  bool _changingColor = false;
+  bool _signingOut = false;
+  String? _error;
+  static const _colors = [
+    Color(0xFF2196F3),
+    Color(0xFF4CAF50),
+    Color(0xFFFF9800),
+    Color(0xFFE91E63),
+    Color(0xFF9C27B0),
+    Color(0xFFF44336),
+    Color(0xFF00BCD4),
+    Color(0xFFFFEB3B),
+  ];
+  static const _colorNames = [
+    'Blue',
+    'Green',
+    'Orange',
+    'Pink',
+    'Purple',
+    'Red',
+    'Cyan',
+    'Yellow',
   ];
 
   @override
   void initState() {
     super.initState();
-    _initializePreferences();
-    _nameController.addListener(_onNameChanged);
+    _name.addListener(_nameChanged);
+    _initialize();
   }
 
-  @override
-  void dispose() {
-    _nameController.removeListener(_onNameChanged);
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _initializePreferences() async {
+  Future<void> _initialize() async {
     try {
-      _prefs = Get.find<UserPreferencesService>();
-    } catch (e) {
-      _prefs = await Get.putAsync(() => UserPreferencesService().init());
-    }
-
-    if (_prefs != null) {
-      _nameController.text = _prefs!.username.value;
-      
+      _prefs =
+          widget.preferences ??
+          (Get.isRegistered<UserPreferencesService>()
+              ? Get.find<UserPreferencesService>()
+              : await Get.putAsync(() => UserPreferencesService().init()));
+      if (!mounted) return;
+      _name.text = _prefs!.username.value;
       setState(() {
-        _isInitialized = true;
-        _isNameDirty = false;
+        _ready = true;
+        _dirty = false;
+        _error = null;
       });
+    } catch (exception) {
+      debugPrint('Profile initialization failed: ${exception.runtimeType}');
+      if (mounted) {
+        setState(() => _error = 'Could not load your profile. Try again.');
+      }
     }
   }
 
-  
+  User? get _user {
+    if (widget.currentUser != null) return widget.currentUser!();
+    if (Get.isRegistered<AuthController>()) {
+      return Get.find<AuthController>().user;
+    }
+    return Supabase.instance.client.auth.currentUser;
+  }
 
-  void _onNameChanged() {
-    if (_prefs == null) return;
-    final current = _nameController.text.trim();
-    final stored = _prefs!.username.value.trim();
-    final dirty = current != stored;
-    if (dirty != _isNameDirty) {
-      setState(() {
-        _isNameDirty = dirty;
-      });
+  void _nameChanged() {
+    if (_prefs == null || !mounted) return;
+    final dirty = _name.text.trim() != _prefs!.username.value.trim();
+    if (dirty != _dirty) setState(() => _dirty = dirty);
+  }
+
+  void _notify(String text) {
+    if (mounted) {
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(SnackBar(content: Text(text)));
     }
   }
 
-  Future<void> _saveUsername() async {
-    if (_prefs == null) return;
-    final text = _nameController.text.trim();
-    if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username cannot be empty')),
-      );
+  Future<void> _saveName() async {
+    if (_prefs == null || _saving) return;
+    final name = _name.text.trim();
+    if (!RegExp(r'^[A-Za-z0-9_.-]{3,20}$').hasMatch(name)) {
+      _notify('Use 3-20 characters: letters, numbers, _ . -');
       return;
     }
-  // Basic format validation
-  final isValid = RegExp(r'^[A-Za-z0-9_.-]{3,20}$').hasMatch(text);
-    if (!isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Use 3-20 chars: letters, numbers, _ . -')),
-      );
-      return;
-    }
+    setState(() => _saving = true);
     try {
-      setState(() {
-        _isSavingName = true;
-      });
-      // Check availability case-insensitively
-      try {
-        final db = Get.find<DatabaseService>();
-        final taken = await db.isDisplayNameTaken(text);
-        if (taken) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Username already taken')),
-          );
-          return;
-        }
-      } catch (_) {
-        // Continue; server-side unique index will still enforce
-      }
-
-      await _prefs!.setUsername(text);
-      setState(() {
-        _isNameDirty = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Username updated')),
-        );
-      }
-    } catch (e) {
-      final msg = e.toString();
-      if (msg.contains('username_taken')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Username already taken')),
-        );
-        return;
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update username: $e')),
-        );
-      }
+      await _prefs!.setUsername(name);
+      if (!mounted) return;
+      setState(() => _dirty = false);
+      _notify('Username updated');
+    } catch (exception) {
+      debugPrint('Profile username update failed: ${exception.runtimeType}');
+      _notify(
+        exception.toString().contains('username_taken')
+            ? 'Username already taken'
+            : 'Could not save your username. Check your connection and try again.',
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSavingName = false;
-        });
-      }
+      if (mounted) setState(() => _saving = false);
     }
   }
 
-  void _refreshProfile() async {
+  Future<void> _refresh() async {
     if (_prefs == null) return;
-    
     try {
-      print('🔄 Refreshing profile from cloud...');
       await _prefs!.forceRefreshProfile();
-      
-      // Profile refreshed successfully - UI will update automatically
-      
-      // Update the UI
-      setState(() {});
-    } catch (e) {
-      print('❌ Error refreshing profile: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to refresh profile: $e'),
-          backgroundColor: Colors.red[700],
-        ),
-      );
+      if (!mounted) return;
+      if (!_dirty) _name.text = _prefs!.username.value;
+      setState(() => _error = null);
+    } catch (exception) {
+      debugPrint('Profile refresh failed: ${exception.runtimeType}');
+      _notify('Could not refresh your profile. Check your connection.');
     }
   }
 
+  bool get _customUnlocked =>
+      Get.isRegistered<PowerUpService>() &&
+      Get.find<PowerUpService>().isActive('flag');
 
-
-  /// Whether the user has unlocked custom territory colors by purchasing the
-  /// "Custom Flag" power-up in the Shop.
-  bool _hasCustomColorUnlock() {
-    try {
-      return Get.isRegistered<PowerUpService>() &&
-          Get.find<PowerUpService>().isActive('flag');
-    } catch (_) {
-      return false;
-    }
-  }
-
-  void _showCustomColorPicker() {
-    if (_prefs == null) return;
-    // Guard again in case this is reached directly.
-    if (!_hasCustomColorUnlock()) return;
-
-    Color tempColor = _prefs!.userColor.value; // Store temporary color
-    
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF0F0F11),
-          title: const Text(
-            'Pick a custom color',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: tempColor,
-              onColorChanged: (color) {
-                tempColor = color; // Update temporary color
-                setDialogState(() {}); // Update dialog UI
-              },
-              enableAlpha: false,
-              displayThumbColor: true,
-              paletteType: PaletteType.hsl,
-              pickerAreaHeightPercent: 0.8,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _changeUserColor(tempColor);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
-              ),
-              child: const Text(
-                'Apply',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Handle user color change with confirmation dialog
-  Future<void> _changeUserColor(Color selectedColor) async {
-    if (_prefs == null) return;
-    
-    // Check if color actually changed
-    if (selectedColor == _prefs!.userColor.value) {
-      print('🎨 Color unchanged, skipping update');
+  Future<void> _customColor() async {
+    if (!_customUnlocked) {
+      _notify('Unlock custom territory colors with Custom Flag in the Shop.');
       return;
     }
-    
-    // Show confirmation dialog
-    final confirmed = await showDialog<bool>(
+    var selected = _prefs!.userColor.value;
+    final color = await showDialog<Color>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF0F0F11),
-        title: const Text(
-          'Change Territory Color',
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        content: Column(children: [
-          const Text(
-            "This will change the color of all your territories on the map. Continue?",
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+        backgroundColor: AppColors.surface,
+        title: const Text('Custom territory color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: selected,
+            onColorChanged: (color) => selected = color,
+            enableAlpha: false,
+            displayThumbColor: true,
+            paletteType: PaletteType.hsl,
           ),
-          const SizedBox(height: 5),
-          const Text(
-            "Restarting the app may be required to see changes.",
-            style: TextStyle(color: Colors.white70, fontSize: 10,fontStyle: FontStyle.italic),
-          )
-        ]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(selected),
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
+    if (color != null && mounted) await _changeColor(color);
+  }
+
+  Future<void> _changeColor(Color color) async {
+    if (_changingColor || color == _prefs!.userColor.value) return;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Change territory color?'),
+        content: const Text(
+          'This updates the color of your territories on the map.',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Change color'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+    setState(() => _changingColor = true);
+    try {
+      final database = Get.find<DatabaseService>();
+      await database.updateAllTerritoryColors(
+        '#${color.toARGB32().toRadixString(16).toUpperCase()}',
+      );
+      await _prefs!.setUserColor(color);
+      if (Get.isRegistered<RunTrackerController>()) {
+        Get.find<RunTrackerController>().refreshUserColor();
+      }
+      if (Get.isRegistered<TerritoryService>()) {
+        final territories = Get.find<TerritoryService>();
+        await territories.refreshNearbyTerritories();
+        await territories.fetchUserTerritories();
+      }
+      _notify('Territory color updated');
+    } catch (exception) {
+      debugPrint('Territory color update failed: ${exception.runtimeType}');
+      _notify('Could not update every territory. Refresh and try again.');
+    } finally {
+      if (mounted) setState(() => _changingColor = false);
+    }
+  }
+
+  Future<void> _signOut() async {
+    if (_signingOut) return;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign out?'),
+        content: const Text('Your saved wallet stays on this device.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+    setState(() => _signingOut = true);
+    try {
+      if (Get.isRegistered<AuthController>()) {
+        await Get.find<AuthController>().signOut();
+      } else {
+        await AuthService().signOut();
+        if (mounted) Navigator.of(context).pushReplacementNamed('/signin');
+      }
+    } catch (exception) {
+      debugPrint('Profile sign out failed: ${exception.runtimeType}');
+      _notify('Could not sign out. Try again.');
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(title: const Text('Profile')),
+      body: !_ready
+          ? Center(
+              child: _error == null
+                  ? const CircularProgressIndicator()
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _error!,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _initialize,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+            )
+          : _user == null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Your running profile',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Sign in to manage your profile and territory history.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 20),
+                    FilledButton(
+                      onPressed: () =>
+                          Navigator.of(context).pushReplacementNamed('/signin'),
+                      child: const Text('Sign in'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _refresh,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _header(),
+                    const SizedBox(height: 24),
+                    _sectionTitle('Activity'),
+                    const SizedBox(height: 12),
+                    _panel(
+                      Column(
+                        children: [
+                          _action(
+                            Icons.history,
+                            'Territory history',
+                            'Review your claimed areas',
+                            () => _open(const TerritoryHistoryPage()),
+                          ),
+                          const Divider(height: 1, color: AppColors.border),
+                          _action(
+                            Icons.insights_outlined,
+                            'Your statistics',
+                            'Distance, runs and territory',
+                            () => _open(const UserStatsPage()),
+                          ),
+                          const Divider(height: 1, color: AppColors.border),
+                          _action(
+                            Icons.notifications_outlined,
+                            'Notifications',
+                            'Stay up to date with your activity',
+                            () => _open(const NotificationsPage()),
+                          ),
+                          const Divider(height: 1, color: AppColors.border),
+                          _action(
+                            Icons.storefront_outlined,
+                            'Power-up shop',
+                            'Use your in-game coins',
+                            () => _open(const StoreView()),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                    const SizedBox(height: 28),
+                    _sectionTitle('Personalize'),
+                    const SizedBox(height: 12),
+                    _username(),
+                    const SizedBox(height: 16),
+                    _colorsPanel(),
+                    const SizedBox(height: 24),
+                    OutlinedButton.icon(
+                      onPressed: _signingOut ? null : _signOut,
+                      icon: const Icon(Icons.logout, size: 18),
+                      label: Text(_signingOut ? 'Signing out...' : 'Sign out'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.danger,
+                        side: const BorderSide(color: AppColors.border),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _header() => Obx(() {
+    final username = _prefs!.username.value;
+    final initial = username.trim().isEmpty
+        ? '?'
+        : username.trim().characters.first.toUpperCase();
+    return _panel(
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              initial,
+              textScaler: TextScaler.noScaling,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
             ),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
-            ),
-            child: const Text(
-              'Change Color',
-              style: TextStyle(color: Colors.white),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  username.isEmpty ? 'Your profile' : username,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (_user?.email != null) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    _user!.email!,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Text(
+                  '${_prefs!.userCoins.value} in-game coins',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Shop balance, separate from wallet tokens.',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
-    
-    if (confirmed != true) return;
-    
-    try {
-      // Show loading indicator
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-      
-      // Update user color in preferences and database
-      await _prefs!.setUserColor(selectedColor);
-      
-      // Update all territory colors in database
-      final databaseService = Get.find<DatabaseService>();
-      String colorHex = '#${selectedColor.value.toRadixString(16).toUpperCase()}';
-      await databaseService.updateAllTerritoryColors(colorHex);
-      
-      // Update run tracker color if available
-      try {
-        final runTracker = Get.find<RunTrackerController>();
-        runTracker.refreshUserColor();
-      } catch (e) {
-        print('Could not update run tracker color: $e');
-      }
-      
-      // Refresh territory service to update frontend
-      try {
-        final territoryService = Get.find<TerritoryService>();
-        await territoryService.refreshNearbyTerritories();
-        await territoryService.fetchUserTerritories();
-      } catch (e) {
-        print('Could not refresh territory service: $e');
-      }
-      
-      // Close loading dialog
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-      
-      // Trigger UI rebuild
-      setState(() {});
-      
-      // Show success message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Territory color updated successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-      
-    } catch (e) {
-      // Close loading dialog
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-      
-      // Show error message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update color: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
-    
-    // Show loading while initializing
-    if (!_isInitialized || _prefs == null) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF0F0F11),
-        appBar: AppBar(
-          title: const Text('Profile'),
-          backgroundColor: const Color(0xFF0F0F11),
-          foregroundColor: Colors.white,
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F0F11),
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: const Color(0xFF0F0F11),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: user == null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'You are not signed in.',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () => Navigator.pushReplacementNamed(context, '/signin'),
-                    child: const Text('Sign In'),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: () async => _refreshProfile(),
-              child: ListView(
-                padding: const EdgeInsets.all(10.0),
-                children: [
-                  _buildProfileHeader(user.email),
-                  const SizedBox(height: 20),
-                  _buildStoreButton(),
-                  const SizedBox(height: 5),
-                  _buildQuickActionsList(),
-                  const SizedBox(height: 5),
-                  _buildUsernameField(),
-                  const SizedBox(height: 5),
-                  _buildColorSelector(),
-                  const SizedBox(height: 20),
-                  // Profile sync card removed
-                  _buildSignOutButton(),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildProfileHeader(String? email) {
-    return Obx(() {
-      final color = _prefs!.userColor.value;
-      final username = _prefs!.username.value.isNotEmpty ? _prefs!.username.value : 'Set your username';
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[850],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-              ),
-              child: CircleAvatar(
-                radius: 40,
-                backgroundColor: color,
-                child: Text(
-                  username.isNotEmpty ? username[0].toUpperCase() : '?',
-                  style: const TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Coins display
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.monetization_on,
-                        color: Colors.amber[400],
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Obx(() => Text(
-                        '${_prefs!.userCoins.value} Coins',
-                        style: TextStyle(
-                          color: Colors.amber[400],
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildUsernameField() {
-    return Card(
-      color: Colors.grey[850],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Username',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Enter your username',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: const Color(0xFF6366F1)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                SizedBox(
-                  height: 48,
-                  child: _isSavingName
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 14),
-                          child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
-                        )
-                      : FilledButton.icon(
-                          onPressed: _isNameDirty ? _saveUsername : null,
-                          icon: const Icon(Icons.save),
-                          label: const Text('Save'),
-                        ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Removed Profile sync card per request
-
-  Widget _buildColorSelector() {
-    return Card(
-      color: Colors.grey[850],
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Your color',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'This color represents you on the map.',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            // Color options display
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                // Predefined color options
-                ..._colorOptions.map((color) => GestureDetector(
-                  onTap: () {
-                    _changeUserColor(color);
-                  },
-                  child: Obx(() => Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(12), // Square with curved corners
-                      border: Border.all(
-                        color: _prefs!.userColor.value == color
-                            ? Colors.white
-                            : Colors.grey[600]!,
-                        width: _prefs!.userColor.value == color ? 3 : 2,
-                      ),
-                    ),
-                    child: _prefs!.userColor.value == color 
-                        ? const Icon(Icons.check, color: Colors.white, size: 20)
-                        : null,
-                  )),
-                )),
-                // Custom color option (premium — unlocked via the Shop's
-                // "Custom Flag / Banner" power-up for 500 $TRACKT).
-                GestureDetector(
-                  onTap: () {
-                    if (_hasCustomColorUnlock()) {
-                      _showCustomColorPicker();
-                    } else {
-                      Get.snackbar(
-                        '🔒 Premium color',
-                        'Unlock custom territory colors with "Custom Flag" (500 \$TRACKT) in the Shop.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: const Color(0xFF202024),
-                        colorText: Colors.white,
-                        duration: const Duration(seconds: 3),
-                      );
-                    }
-                  },
-                  child: Obx(() {
-                    final unlocked = _hasCustomColorUnlock();
-                    final isCustomColor = !_colorOptions.contains(_prefs!.userColor.value);
-                    return Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: (unlocked && isCustomColor)
-                            ? _prefs!.userColor.value
-                            : Colors.grey[800],
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: (unlocked && isCustomColor) ? Colors.white : Colors.grey[600]!,
-                          width: (unlocked && isCustomColor) ? 3 : 2,
-                        ),
-                      ),
-                      child: Icon(
-                        unlocked ? Icons.palette : Icons.lock_outline,
-                        color: (unlocked && isCustomColor) ? Colors.white : Colors.grey[400],
-                        size: 20,
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStoreButton() {
-    return _ActionTile(
-      color: Colors.orange,
-      icon: Icons.shopping_bag,
-      title: 'Store',
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const StoreView(),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildQuickActionsList() {
-    return Column(
-      children: [
-        _ActionTile(
-          color: const Color(0xFF6366F1),
-          icon: Icons.history,
-          title: 'Territory History',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const TerritoryHistoryPage(),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 5),
-        _ActionTile(
-          color: Colors.green,
-          icon: Icons.analytics,
-          title: 'User Stats',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const UserStatsPage(),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 5),
-        _ActionTile(
-          color: Colors.amber,
-          icon: Icons.notifications,
-          title: 'Notifications',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const NotificationsPage(),
-              ),
-            );
-          },
-        ),
-  // Removed Add Password action from Profile view
-      ],
-    );
-  }
-
-  Widget _buildSignOutButton() {
-    return SizedBox(
-      width: 100,
-      child: ElevatedButton(
-        onPressed: () async {
-          await AuthService().signOut();
-          if (context.mounted) {
-            Navigator.pushReplacementNamed(context, '/signin');
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red[600],
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-        ),
-        child: const Text('Sign Out'),
-      ),
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  const _ActionTile({
-    required this.color,
-    required this.icon,
-    required this.title,
-    required this.onTap,
   });
 
-  final Color color;
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
+  Widget _username() => _panel(
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Username',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _name,
+          enabled: !_saving,
+          autocorrect: false,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) {
+            if (_dirty) _saveName();
+          },
+          decoration: const InputDecoration(hintText: 'Your username'),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          '3-20 characters. Letters, numbers, _ . -',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: _dirty && !_saving ? _saveName : null,
+          child: Text(_saving ? 'Saving...' : 'Save username'),
+        ),
+      ],
+    ),
+  );
+
+  Widget _colorsPanel() => _panel(
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Territory color',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Choose how your territories appear on the map.',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 13,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Obx(() {
+          final selected = _prefs!.userColor.value;
+          return Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (var index = 0; index < _colors.length; index++)
+                Tooltip(
+                  message: _colorNames[index],
+                  child: Semantics(
+                    label: '${_colorNames[index]} territory color',
+                    selected: selected == _colors[index],
+                    button: true,
+                    child: InkWell(
+                      onTap: _changingColor
+                          ? null
+                          : () => _changeColor(_colors[index]),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _colors[index],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: selected == _colors[index]
+                                ? AppColors.textPrimary
+                                : AppColors.border,
+                            width: 2,
+                          ),
+                        ),
+                        child: selected == _colors[index]
+                            ? Icon(
+                                Icons.check,
+                                color: _colors[index].computeLuminance() > 0.5
+                                    ? Colors.black
+                                    : Colors.white,
+                                size: 20,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
+        const SizedBox(height: 14),
+        OutlinedButton.icon(
+          onPressed: _changingColor ? null : _customColor,
+          icon: Icon(
+            _customUnlocked ? Icons.palette_outlined : Icons.lock_outline,
+            size: 18,
+          ),
+          label: const Text('Custom color'),
+        ),
+        if (_changingColor)
+          const Padding(
+            padding: EdgeInsets.only(top: 12),
+            child: LinearProgressIndicator(),
+          ),
+      ],
+    ),
+  );
+
+  Widget _sectionTitle(String title) => Text(
+    title,
+    style: const TextStyle(
+      color: AppColors.textPrimary,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+    ),
+  );
+
+  Widget _panel(
+    Widget child, {
+    EdgeInsets padding = const EdgeInsets.all(16),
+  }) => Container(
+    padding: padding,
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: child,
+  );
+
+  Widget _action(
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+  ) => ListTile(
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    leading: Icon(icon, color: AppColors.textSecondary, size: 20),
+    title: Text(
+      title,
+      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+    ),
+    subtitle: Text(
+      subtitle,
+      style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+    ),
+    trailing: const Icon(
+      Icons.chevron_right,
+      color: AppColors.textMuted,
+      size: 18,
+    ),
+    onTap: onTap,
+  );
+
+  Future<void> _open(Widget page) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => page));
+    if (mounted) setState(() {});
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: Colors.grey[850],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[700]!),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: color),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-              ),
-            ),
-            Icon(Icons.chevron_right, color: Colors.grey[500]),
-          ],
-        ),
-      ),
-    );
+  void dispose() {
+    _name.removeListener(_nameChanged);
+    _name.dispose();
+    super.dispose();
   }
 }

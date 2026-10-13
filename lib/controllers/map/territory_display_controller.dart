@@ -604,7 +604,7 @@ class TerritoryDisplayController extends GetxController {
   Future<void> flyToTerritory(Territory territory) async {
     if (_mapboxMap == null) {
       print('❌ Map not initialized, cannot fly to territory');
-      return;
+      throw StateError('The map is not ready yet.');
     }
     
     try {
@@ -633,25 +633,10 @@ class TerritoryDisplayController extends GetxController {
       
       print('✅ Successfully flew to territory: ${territory.id}');
       
-      // Show a brief snackbar to confirm the action
-      Get.snackbar(
-        'Territory Focused',
-        '${(territory.area / 1000).toStringAsFixed(2)} km² territory',
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-      );
       
     } catch (e) {
       print('❌ Error flying to territory: $e');
-      Get.snackbar(
-        'Navigation Error',
-        'Could not focus on territory',
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      rethrow;
     }
   }
   

@@ -3,9 +3,12 @@ import '../models/territory/territory_model.dart';
 import '../models/territory/steal_event_model.dart';
 
 class DatabaseService {
+  final SupabaseClient? _client;
+
+  DatabaseService({SupabaseClient? client}) : _client = client;
   // Lazy so constructing the service doesn't throw when Supabase isn't
   // initialized (e.g. unit tests, or when Supabase keys aren't configured).
-  SupabaseClient get _supabase => Supabase.instance.client;
+  SupabaseClient get _supabase => _client ?? Supabase.instance.client;
 
   // ==================== TERRITORIES ====================
 
@@ -309,7 +312,7 @@ class DatabaseService {
       return territories;
     } catch (e) {
       print('❌ Error fetching user territories: $e');
-      return [];
+      rethrow;
     }
   }
 
@@ -890,57 +893,25 @@ class DatabaseService {
   // ==================== DAILY CHALLENGE ====================
 
   // currentUserId getter already defined below in utility methods; avoid duplication
-  String? get dailyChallengeCurrentUserId => _supabase.auth.currentUser?.id;
+  String? get dailyChallengeCurrentUserId => currentUserId;
 
   Future<Map<String, dynamic>?> fetchDailyChallengeProgress() async {
     try {
-      final rpc = await _supabase.rpc('get_daily_challenge_progress');
-      if (rpc is Map<String, dynamic>) {
-        print('🛰️ Daily challenge RPC result: $rpc');
-        return rpc;
-      }
-      if (rpc is List && rpc.isNotEmpty && rpc.first is Map<String, dynamic>) {
-        final mapped = Map<String, dynamic>.from(rpc.first);
-        print('🛰️ Daily challenge RPC list[0]: $mapped');
-        return mapped;
-      }
+      final rpc = await _supabase.rpc('get_daily_challenge_progress')
+          .timeout(const Duration(seconds: 12));
+      return _dailyChallengeResponse(rpc);
     } catch (e) {
       print('⚠️ RPC get_daily_challenge_progress failed: $e');
+      rethrow;
     }
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return null;
-      final rows = await _supabase
-          .from('user_challenge_progress')
-          .select('*')
-          .eq('user_id', user.id)
-          .limit(1);
-      print('🛰️ Raw user_challenge_progress rows: $rows');
-      if (rows.isNotEmpty) {
-        final r = Map<String, dynamic>.from(rows.first);
-        String? findKey(List<String> candidates){
-          for(final k in candidates){ if(r.containsKey(k) && r[k]!=null) return k; }
-          return null; }
-        final distKey = findKey(['distance_meters','distance','total_distance','total_distance_today']);
-        final durKey = findKey(['duration_minutes','minutes','total_minutes','total_minutes_today']);
-        final compKey = findKey(['completed','is_completed','done']);
-        final coinsKey = findKey(['coins','current_coins','reward_coins']);
-        final normalized = {
-          'total_distance_today': (r[distKey] as num?)?.toDouble() ?? 0,
-          'total_minutes_today': (r[durKey] as num?)?.toInt() ?? 0,
-          'completed': r[compKey] == true,
-          'target_distance': 500,
-          'target_minutes': 10,
-          'coins': (r[coinsKey] as num?)?.toInt() ?? 0,
-          'raw_row': r,
-        };
-        print('🛰️ Normalized user_challenge_progress: $normalized');
-        return normalized;
-      }
-    } catch (e) {
-      print('⚠️ Fallback user_challenge_progress fetch failed: $e');
+  }
+
+  Map<String, dynamic> _dailyChallengeResponse(Object? response) {
+    final value = response is List && response.length == 1 ? response.single : response;
+    if (value is! Map<String, dynamic>) {
+      throw const FormatException('Invalid daily challenge RPC response');
     }
-    return null;
+    return value;
   }
 
   Future<Map<String, dynamic>?> createRunAndMaybeAward({required int durationMinutes, required double distanceMeters}) async {
@@ -948,12 +919,11 @@ class DatabaseService {
       final result = await _supabase.rpc('create_run_and_maybe_award', params: {
         'p_duration_minutes': durationMinutes,
         'p_distance_meters': distanceMeters,
-      });
-      if (result is Map<String, dynamic>) return result;
-      return null;
+      }).timeout(const Duration(seconds: 12));
+      return _dailyChallengeResponse(result);
     } catch (e) {
       print('❌ Error calling create_run_and_maybe_award: $e');
-      return null;
+      rethrow;
     }
   }
 

@@ -155,6 +155,21 @@ proofs. Missing configuration, an unavailable indexer, and an empty indexed
 chain have distinct states. A broadcast hash is not labeled confirmed;
 check its receipt on the explorer.
 
+### Daily challenge
+
+The goal is cumulative **500 m and 10 active minutes across completed real
+runs within a UTC day**, rewarded with **100 in-game coins once per day**.
+A territory/closed loop is not required. Judge Demo simulations and cancelled
+runs do not count. The server currently records whole minutes per completed
+run, so partial minutes are rounded down; paused time is excluded.
+
+Quests refreshes on tab entry, pull-to-refresh, app resume and day rollover.
+Failed synchronization is shown explicitly and must not be confused with a
+completed reward. The server's authoritative reward balance is persisted
+locally without a second increment or client write-back. A disposable live
+test confirmed exact thresholds and no repeat reward; normal on-phone
+physical movement remains a manual verification step.
+
 Never put deployment tokens or service-role credentials into Flutter assets.
 The retired AI integration is not part of Trackt or its submission; retained
 database migration history is documented in [supabase/README.md](supabase/README.md).

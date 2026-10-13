@@ -1,220 +1,200 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../services/daily_challenge_service.dart';
-import '../../services/user_preferences_service.dart';
 
-class DailyQuestsView extends StatelessWidget {
+import '../../core/theme/app_colors.dart';
+import '../../services/daily_challenge_service.dart';
+
+class DailyQuestsView extends StatefulWidget {
   const DailyQuestsView({super.key});
 
-  DailyChallengeService _ensureService() {
-    if (!Get.isRegistered<DailyChallengeService>()) {
-      Get.put(DailyChallengeService());
-    }
-    final svc = Get.find<DailyChallengeService>();
-    // Fire and forget refresh (won't spam due to internal cache)
-    svc.refreshFromServer();
-    return svc;
+  @override
+  State<DailyQuestsView> createState() => _DailyQuestsViewState();
+}
+
+class _DailyQuestsViewState extends State<DailyQuestsView> {
+  late final DailyChallengeService _challenge;
+
+  @override
+  void initState() {
+    super.initState();
+    _challenge = Get.isRegistered<DailyChallengeService>()
+        ? Get.find<DailyChallengeService>()
+        : Get.put(DailyChallengeService());
+    _challenge.refreshFromServer(force: true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F11),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Daily Quests'),
-        backgroundColor: const Color(0xFF0F0F11),
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('Daily challenge'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh challenge',
+            onPressed: () => _challenge.refreshFromServer(force: true),
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20.0),
-        children: [
-            // Daily Challenge Card
-            Builder(
-              builder: (context) {
-                final svc = _ensureService();
-                final prefs = Get.isRegistered<UserPreferencesService>() ? Get.find<UserPreferencesService>() : null;
-                return Obx(() {
-                  final coins = prefs?.userCoins.value ?? 0;
-                  final completed = svc.isCompletedToday.value;
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xFF17171A),
-                      border: Border.all(
-                        color: completed
-                            ? const Color(0xFF34D399)
-                            : const Color(0xFF2A2A2F),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        onRefresh: () => _challenge.refreshFromServer(force: true),
+        child: Obx(
+          () => ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            children: [
+              const Text(
+                'A little movement, every day.',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              completed ? Icons.check_circle : Icons.flag,
-                              color: Colors.white,
-                              size: 34,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Daily Challenge',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.25),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.monetization_on, color: Colors.amber, size: 20),
-                                  const SizedBox(width: 4),
-                                  const Text('100', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
                         Text(
-                          'Complete a run of at least 10 min and 500 m today to earn 100 coins.',
-                          style: TextStyle(color: Colors.white.withOpacity(0.9)),
-                        ),
-                        const SizedBox(height: 12),
-                        _ProgressBar(
-                          label: 'Distance',
-                          value: (svc.distanceMetersToday.value).clamp(0, DailyChallengeService.targetDistance),
-                          max: DailyChallengeService.targetDistance,
-                          unit: 'm',
-                          completedColor: Colors.greenAccent,
-                        ),
-                        const SizedBox(height: 8),
-                        _ProgressBar(
-                          label: 'Duration',
-                          value: (svc.durationMinutesToday.value.toDouble()).clamp(0, DailyChallengeService.targetMinutes.toDouble()),
-                          max: DailyChallengeService.targetMinutes.toDouble(),
-                          unit: 'min',
-                          completedColor: Colors.greenAccent,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                completed ? 'Completed today!' : 'Not completed yet',
-                                style: TextStyle(
-                                  color: completed ? Colors.white : Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Balance: $coins',
-                              style: const TextStyle(color: Colors.white70, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                        if (completed && svc.completedAt.value != null) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            'Completed at ${svc.friendlyDate(svc.completedAt.value)}',
-                            style: const TextStyle(color: Colors.white54, fontSize: 12),
+                          _challenge.isCompletedToday.value
+                              ? 'Completed today'
+                              : 'Today’s goal',
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ]
+                        ),
+                        Text(
+                          '+${_challenge.rewardCoins.value} in-game coins',
+                          style: const TextStyle(
+                            color: AppColors.accent,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
-                  );
-                });
-              },
-            ),
-            const SizedBox(height: 30),
-            // Additional info
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF17171A),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.35)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline,
-                    color: Color(0xFF6366F1),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Complete today\'s challenge once per day. Resets at UTC midnight.',
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Run a total of 500 m and 10 active minutes today. '
+                      'Completed real runs add up, even without a territory.',
                       style: TextStyle(
-                        color: Colors.grey[300],
-                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                        height: 1.5,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    _progress(
+                      'Distance',
+                      _challenge.distanceMetersToday.value,
+                      DailyChallengeService.targetDistance,
+                      'm',
+                    ),
+                    const SizedBox(height: 20),
+                    _progress(
+                      'Active time',
+                      _challenge.durationMinutesToday.value.toDouble(),
+                      DailyChallengeService.targetMinutes.toDouble(),
+                      'min',
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      _challenge.isCompletedToday.value
+                          ? 'Reward claimed for today. Keep running for tomorrow.'
+                          : 'Finish a real run to save your progress.',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                    if (_challenge.isLoading.value) ...[
+                      const SizedBox(height: 16),
+                      const LinearProgressIndicator(
+                        color: AppColors.accent,
+                        backgroundColor: AppColors.surfaceVariant,
+                      ),
+                    ],
+                    if (_challenge.error.value != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        _challenge.error.value!,
+                        style: const TextStyle(
+                          color: AppColors.warning,
+                          fontSize: 12,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: _challenge.isLoading.value
+                            ? null
+                            : () => _challenge.refreshFromServer(force: true),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              const Text(
+                'Resets at midnight UTC. Rewarded once per day. '
+                'Judge Demo simulations do not count. Active minutes are recorded '
+                'as whole minutes for each completed run.',
+                style: TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                  height: 1.6,
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
     );
   }
-}
 
-class _ProgressBar extends StatelessWidget {
-  final String label;
-  final double value;
-  final double max;
-  final String unit;
-  final Color completedColor;
-  const _ProgressBar({
-    required this.label,
-    required this.value,
-    required this.max,
-    required this.unit,
-    required this.completedColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final fraction = max <= 0 ? 0.0 : (value / max).clamp(0.0, 1.0);
-    final done = fraction >= 1.0;
+  Widget _progress(String label, double value, double target, String unit) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          spacing: 16,
+          runSpacing: 6,
           children: [
             Text(
               label,
-              style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+              ),
             ),
-            const Spacer(),
             Text(
-              '${value.toStringAsFixed(label == 'Distance' ? 0 : 0)}/${max.toStringAsFixed(0)} $unit',
-              style: TextStyle(color: Colors.white70, fontSize: 12),
+              '${value.toStringAsFixed(0)} / ${target.toStringAsFixed(0)} $unit',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
-            value: fraction,
-            minHeight: 10,
-            backgroundColor: Colors.white.withOpacity(0.18),
-            valueColor: AlwaysStoppedAnimation<Color>(done ? completedColor : Colors.amber),
+            value: (value / target).clamp(0, 1),
+            minHeight: 6,
+            color: AppColors.accent,
+            backgroundColor: AppColors.surfaceVariant,
           ),
         ),
       ],

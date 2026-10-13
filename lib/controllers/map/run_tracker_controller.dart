@@ -52,7 +52,6 @@ class RunTrackerController extends GetxController {
   String? _lastClaimExplorerUrl; // explorer URL for the last claim
   Future<void>? _pendingClaimFuture; // in-flight on-chain claim for the active run
   bool _victoryShown = false; // suppress auto-nav when the victory dialog is up
-  bool _dailyChallengeAttempted = false; // ensure one award attempt per run
   final RxInt rejectedGpsPoints = 0.obs; // Anti-cheat: count of implausible-speed rejects
   final RxInt lastRewardCoins = 0.obs; // $TRACKT awarded for the last completed run
   
@@ -79,6 +78,8 @@ class RunTrackerController extends GetxController {
   Timer? _durationTimer;
   Timer? _gpsHealthCheckTimer; // Monitor GPS health
   DateTime? _runStartTime;
+  DateTime? _pausedAt;
+  Duration _pausedDuration = Duration.zero;
   DateTime? _lastGpsUpdate; // Track when we last received GPS data
   int _gpsRestartCount = 0; // Track GPS restart attempts
   geo.Position? _lastPosition;
@@ -338,7 +339,7 @@ class RunTrackerController extends GetxController {
         _runStartTime = DateTime.now();
         currentRunSession.value = RunSession(
           id: _uuid.v4(),
-          userId: 'current_user', // TODO: Get from auth
+          userId: _databaseService.currentUserId ?? 'anonymous',
           startTime: _runStartTime!,
           rawPath: [],
           status: RunStatus.active,
@@ -514,6 +515,7 @@ class RunTrackerController extends GetxController {
     }
     
     print('🛑 Stopping run...');
+    _updateActiveDuration();
     runState.value = RunState.finished;
   isRunning.value = false;
   isPaused.value = false;
@@ -526,6 +528,23 @@ class RunTrackerController extends GetxController {
     // Stop all tracking
     _stopLocationTracking();
     _durationTimer?.cancel();
+    final session = currentRunSession.value;
+    if (session != null && !isSimulating.value) {
+      final challenge = Get.isRegistered<DailyChallengeService>()
+          ? Get.find<DailyChallengeService>()
+          : Get.put(DailyChallengeService(database: _databaseService));
+      if (session.userId != _databaseService.currentUserId) {
+        challenge.error.value = 'The account changed during this run. '
+            'Sign in with the original account to check your challenge.';
+      } else {
+        await challenge.recordCompletedRun(
+          runId: session.id,
+          duration: runDuration.value,
+          distanceMeters: totalDistance.value,
+          isSimulation: false,
+        );
+      }
+    }
     
 
     
@@ -551,11 +570,7 @@ class RunTrackerController extends GetxController {
       print('⚠️ No current run session to update');
     }
     
-    Get.snackbar(
-      'Run Completed',
-      'Distance: ${(totalDistance.value / 1000).toStringAsFixed(2)} km',
-      duration: const Duration(seconds: 3),
-    );
+    _showRunNotice('Run completed: ${(totalDistance.value / 1000).toStringAsFixed(2)} km');
     
     // Process territory creation
     print('🗺️ Calling territory creation process...');
@@ -564,8 +579,20 @@ class RunTrackerController extends GetxController {
     print('🗺️ _processTerritoryCreation() call completed');
   }
 
+  void _showRunNotice(String message) {
+    final context = Get.context;
+    final messenger = context == null ? null : ScaffoldMessenger.maybeOf(context);
+    if (messenger != null) {
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } else {
+      debugPrint('Run notice: $message');
+    }
+  }
+
   void pauseRun() async {
     if (!isRunning.value) return;
+    _updateActiveDuration();
+    _pausedAt = DateTime.now();
     
     runState.value = RunState.paused;
     isRunning.value = false;
@@ -586,6 +613,10 @@ class RunTrackerController extends GetxController {
 
   void resumeRun() async {
     if (isRunning.value || currentRunSession.value == null) return;
+    if (_pausedAt != null) {
+      _pausedDuration += DateTime.now().difference(_pausedAt!);
+      _pausedAt = null;
+    }
     
     runState.value = RunState.running;
     isRunning.value = true;
@@ -635,8 +666,9 @@ class RunTrackerController extends GetxController {
     currentPath.clear();
     _rawPathPoints.clear();
     _lastPosition = null;
-    _dailyChallengeAttempted = false; // fresh run → allow a new award attempt
     _runStartTime = null;
+    _pausedAt = null;
+    _pausedDuration = Duration.zero;
     
     print('✅ Tracking data reset complete');
   }
@@ -787,9 +819,29 @@ class RunTrackerController extends GetxController {
     
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_runStartTime != null && isRunning.value) {
-        runDuration.value = DateTime.now().difference(_runStartTime!);
+        _updateActiveDuration();
       }
     });
+  }
+
+  static Duration activeRunDuration({
+    required DateTime startedAt,
+    required DateTime now,
+    required Duration pausedDuration,
+    DateTime? pausedAt,
+  }) {
+    final elapsed = (pausedAt ?? now).difference(startedAt) - pausedDuration;
+    return elapsed.isNegative ? Duration.zero : elapsed;
+  }
+
+  void _updateActiveDuration() {
+    if (_runStartTime == null) return;
+    runDuration.value = activeRunDuration(
+      startedAt: _runStartTime!,
+      now: DateTime.now(),
+      pausedDuration: _pausedDuration,
+      pausedAt: _pausedAt,
+    );
   }
 
   // Origin of the active simulated run, used to reject stray real-GPS points.
@@ -1158,11 +1210,7 @@ class RunTrackerController extends GetxController {
     
     if (_rawPathPoints.isEmpty) {
       print('❌ No GPS points available for territory creation');
-      Get.snackbar(
-        'No GPS Data',
-        'No GPS tracking data available. Please try running again.',
-        duration: const Duration(seconds: 3),
-      );
+      _showRunNotice('No GPS data is available for a territory. Completed real runs still count toward the daily challenge.');
       _isProcessingTerritory = false;
       Get.offAllNamed('/home'); // Navigate to main app view
       _resetRun();
@@ -1171,11 +1219,7 @@ class RunTrackerController extends GetxController {
     
     if (_rawPathPoints.length < 3) {
       print('❌ Insufficient GPS points: ${_rawPathPoints.length} < 3');
-      Get.snackbar(
-        'Insufficient Data',
-        'Not enough GPS points to create territory',
-        duration: const Duration(seconds: 3),
-      );
+      _showRunNotice('Not enough GPS points to create a territory. Completed real runs still count toward the daily challenge.');
       _isProcessingTerritory = false;
       Get.offAllNamed('/home'); // Navigate to main app view
       _resetRun();
@@ -1278,11 +1322,6 @@ class RunTrackerController extends GetxController {
       // Judge simulation. Guarded so test environments without the service pass.
       _pendingClaimFuture = _dispatchMonadClaim(newTerritory);
       _awardRunReward(area);
-      // Update the daily challenge from this run (real runs only). Independent
-      // of navigation so it fires even when a victory dialog handles routing.
-      if (!isSimulating.value) {
-        _attemptDailyChallengeAward();
-      }
 
       
       // Verify polygon closure
@@ -2031,8 +2070,6 @@ class RunTrackerController extends GetxController {
     }
     
     try {
-  // Attempt daily challenge award (new logic). Navigation always proceeds after check.
-  await _attemptDailyChallengeAward();
   _navigateToMainMapAfterAnimation();
       
     } catch (e) {
@@ -2042,37 +2079,6 @@ class RunTrackerController extends GetxController {
     }
   }
   
-  /// Attempt daily challenge award (server-side single-award safeguard)
-  Future<void> _attemptDailyChallengeAward() async {
-    if (_dailyChallengeAttempted) return; // one attempt per completed run
-    _dailyChallengeAttempted = true;
-    try {
-      final runDurationMinutes = runDuration.value.inMinutes;
-      final runDistanceMeters = totalDistance.value;
-      if (!Get.isRegistered<DatabaseService>()) return;
-      final db = Get.find<DatabaseService>();
-      final result = await db.createRunAndMaybeAward(
-        durationMinutes: runDurationMinutes,
-        distanceMeters: runDistanceMeters,
-      );
-      DailyChallengeService? svc;
-      if (Get.isRegistered<DailyChallengeService>()) {
-        svc = Get.find<DailyChallengeService>();
-        svc.applyRunResult(result);
-      }
-      final awarded = result?['awarded'] == true;
-      if (awarded) {
-        // Avoid manual coin increment; rely on server & subsequent profile refresh elsewhere
-        print('✅ Daily challenge coins awarded (server authoritative).');
-      } else {
-        print('ℹ️ Daily challenge not yet completed.');
-      }
-      // Optionally force refresh to sync coins/progress
-      svc?.refreshFromServer(force: true);
-    } catch (e) {
-      print('❌ Error attempting daily challenge award: $e');
-    }
-  }
 
   /// Navigate to main map after animation completes
   void _navigateToMainMapAfterAnimation() {
@@ -2118,6 +2124,8 @@ class RunTrackerController extends GetxController {
     _durationTimer?.cancel();
     _durationTimer = null;
     _runStartTime = null;
+    _pausedAt = null;
+    _pausedDuration = Duration.zero;
     
     // Clear map elements
     _clearPathFromMap();

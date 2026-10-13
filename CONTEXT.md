@@ -358,3 +358,39 @@ captions, and demonstrates the funded gameplay transaction beyond login.
 This resolves the earlier Privy funding/proof gap. Envio's exact-hash query
 still did not contain this new transaction during verification; the video
 labels the older real standings and pending backfill honestly.
+
+## 15. Profile, recent territories and challenge correction - October 13, 2026
+
+Profile and the home recent-territory section now match the professional flat
+neutral/indigo club UI. Profile separates in-game coins from ERC-20 wallet
+tokens, preserves activity/shop links and color unlocks, and confirms sign-out.
+Username saves wait for the server and surface rejection before local updates.
+Recent claims use m2/ha/km2 appropriately, calendar-relative dates, loading/
+error states and actual ownership; no speculative loss classification.
+Map taps collapse the persistent sheet rather than popping home, with
+ScaffoldMessenger feedback replacing a reproduced GetX overlay exception.
+
+Daily Challenge RPCs were verified on a disposable live account: two real
+test inserts totalling exactly 500 m / 10 min awarded 100 coins once;
+a later insert did not award again, and the temporary account was removed.
+The backend already worked; client wiring was incomplete and stale.
+Completed real runs now record challenge progress on stop before any
+territory early-return, only for the original account. Simulations and
+navigation never insert physical progress. Cache is short-lived with
+explicit tab/resume/UTC-reset refresh, stale responses are ignored, errors
+are visible, authoritative coins persist locally without write-back, and
+paused time is excluded. Whole-minute-per-run server behavior is disclosed.
+
+The installed phone showed expected 0/500 m and 0/10 min after Judge Demo
+simulations; no physical movement was faked or real-user rewards fabricated.
+The demo video remains `build/demo/trackt-privy-demo.mp4`.
+
+Final validation: **132 Flutter tests pass**, including challenge service/RPC,
+real no-territory stop and simulation/account-switch exclusions, coin/username
+persistence, responsive UI and persistent-map focus/error tests. New/rewritten
+UI and tests analyze cleanly; full analyzer has zero compile errors with a
+reduced existing lint backlog. Release rebuilt and installed as an in-place
+phone update. Profile, recent claims and server challenge progress were
+physically inspected; the exact map-focus overlay exception was reproduced
+and then rechecked with **zero runtime error/overflow markers** after the fix.
+No real-user run credit, name/color change or wallet reset was fabricated.

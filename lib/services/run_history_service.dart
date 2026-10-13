@@ -112,20 +112,27 @@ class TerritoryHistoryService extends GetxService {
   
   /// Format area for display
   String formatArea(double area) {
-    // area is in square meters
-    return '${(area / 1000000).toStringAsFixed(2)} km²';
+    return displayArea(area);
+  }
+
+  static String displayArea(double area) {
+    if (area >= 1000000) return '${(area / 1000000).toStringAsFixed(2)} km²';
+    if (area >= 10000) return '${(area / 10000).toStringAsFixed(2)} ha';
+    return '${area.toStringAsFixed(0)} m²';
   }
   
   /// Format date for display
   String formatDate(DateTime date) {
     final now = DateTime.now();
-    final difference = now.difference(date);
+    final localDate = date.toLocal();
+    final difference = DateTime(now.year, now.month, now.day)
+        .difference(DateTime(localDate.year, localDate.month, localDate.day));
     
     if (difference.inDays == 0) {
-      return 'Today ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+      return 'Today ${localDate.hour}:${localDate.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays == 1) {
-      return 'Yesterday ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-    } else if (difference.inDays < 7) {
+      return 'Yesterday ${localDate.hour}:${localDate.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inDays > 0 && difference.inDays < 7) {
       return '${difference.inDays} days ago';
     } else {
       return '${date.day}/${date.month}/${date.year}';

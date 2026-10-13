@@ -66,6 +66,61 @@ is determined by the club's creator ID rather than the first row.
 
 ---
 
+## Profile, recent territories and daily challenge - October 13, 2026
+
+Profile now uses shared flat neutral/indigo panels, clear activity links,
+responsive username controls and accessible territory-color choices. Its
+balance is explicitly **in-game coins**, not the wallet's on-chain token
+balance. Shop/history/stats/notifications, Custom Flag gating and sign-out
+remain available; invalid or server-rejected username changes are not
+presented as successful local updates.
+
+Recent territory cards use accurate m2/ha/km2 unit boundaries, readable dates
+and verified ownership rather than guessing partial losses from area.
+Tapping a recent claim focuses the map and collapses the persistent home
+sheet; it does not pop the home route. Map feedback uses the screen's
+ScaffoldMessenger rather than the failing GetX overlay path.
+
+The deployed challenge backend was checked with a disposable authenticated
+validation account: 250 m / 4 min plus 250 m / 6 min yielded **100 coins once**.
+A subsequent run added progress without awarding again. The account and
+dependent test data were removed; no real user's challenge was fabricated.
+
+Client fixes:
+- Record completed **real** runs at stop, before territory creation can fail,
+  and only for the account that started the run. No loop claim is required.
+- Never credit Judge Demo simulations, cancelled runs or a later navigation
+  callback. Repeated callbacks for the same session cannot insert again.
+- Fetch on opening Quests, explicit refresh, resume and UTC-day rollover,
+  rather than keeping a whole-day cache. Reject stale account/day responses.
+- Persist the authoritative server coin balance without writing it back
+  to the server or incrementing the reward a second time.
+- Show sync errors instead of falling back to an undated legacy row or
+  pretending progress is zero. Do not invent a completion timestamp.
+- Exclude paused wall time. The current server RPC stores whole active
+  minutes per completed run; seconds are rounded down for each run.
+
+On-device check:
+- [ ] Complete real runs totalling at least **500 m and 10 active minutes**,
+  stop each run, then open Quests. Verify progress and one 100-coin award.
+- [ ] A no-territory run still contributes; a simulation does not.
+- [ ] Pull to refresh Profile/Quests, cancel color/sign-out dialogs and check
+  history/shop links. Confirm failed username saves preserve the old name.
+- [ ] Tap an 18 m2-style recent claim: map focuses, sheet collapses and no
+  route/overlay exception occurs.
+
+The connected phone's current 0/500 m and 0/10 min challenge values reflect
+its actual server state after demo simulations; this is expected, not a
+completed physical-run test. The recorded video remains at
+`build/demo/trackt-privy-demo.mp4`.
+
+Final automated result: **132 tests pass**, zero compile errors. The release
+update is installed on the connected phone; Profile, recent cards and Quests
+were visually checked. The 18 m2 recent-card tap now collapses the home sheet
+without navigation loss or the reproduced GetX overlay exception. No
+names/colors/account memberships or real-user challenge credit were changed
+during the live checks.
+
 ## P0 — MonadService (done earlier, committed `24b895e`)
 - [ ] Launch app on device/emulator. Confirm no boot crash from `MonadService().init()`.
 - [ ] Check logs for `⛓️ MonadService ready. Wallet: 0x…` — wallet address generated once, same on relaunch (persisted).
@@ -205,8 +260,6 @@ Global theme + per-screen Monad palette. Visual only — verify on device.
 - [ ] Live run stats card uses cyan/amber/purple metrics (not blue/green/orange).
 - [ ] No leftover bright-blue Material accents on primary surfaces (swapped to Monad purple/cyan). Semantic red (stop) / green (go) on run controls intentionally kept.
 - [ ] Nothing clipped or overflowing at phone width after the spacing/compactness changes.
-
-
 
 
 
